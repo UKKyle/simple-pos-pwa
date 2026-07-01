@@ -51,7 +51,7 @@ export function PosPage({
   }, [products, search])
 
   return (
-    <div className="grid h-full gap-4 xl:grid-cols-[minmax(0,1fr)_420px]">
+    <div className="grid h-full gap-4 lg:grid-cols-[minmax(0,1fr)_360px] xl:grid-cols-[minmax(0,1fr)_420px]">
       <section className="min-w-0 rounded-3xl border border-white/8 bg-zinc-950/70 p-4">
         <label className="relative block">
           <span className="sr-only">Search products</span>

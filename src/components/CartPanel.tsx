@@ -37,7 +37,7 @@ export function CartPanel({
   onCheckout,
 }: CartPanelProps) {
   return (
-    <aside className="flex h-full min-h-[70vh] flex-col rounded-3xl border border-white/10 bg-zinc-950 p-4 shadow-2xl lg:min-h-0">
+    <aside className="flex h-full min-h-[70vh] flex-col rounded-3xl border border-white/10 bg-zinc-950 p-4 shadow-2xl lg:min-h-0 lg:max-h-full">
       <div className="mb-4 flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-black text-white">Basket</h2>
