@@ -19,7 +19,8 @@ export function useOrders() {
 
   const createOrder = async (data: Omit<Order, 'id' | 'orderNumber' | 'paymentStatus' | 'createdAt'>) => {
     const order = await db.transaction('rw', db.orders, db.meta, async () => {
-      const current = (await db.meta.get('orderSequence'))?.value ?? 0
+      const rawCurrent = (await db.meta.get('orderSequence'))?.value
+      const current = typeof rawCurrent === 'number' ? rawCurrent : 0
       const next = current + 1
       await db.meta.put({ key: 'orderSequence', value: next })
       const created: Order = {

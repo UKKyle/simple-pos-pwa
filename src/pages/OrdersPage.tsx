@@ -30,7 +30,7 @@ export function OrdersPage({ orders, currency, onDeleteOrder }: OrdersPageProps)
   }, [orders, search, method])
 
   return (
-    <section className="rounded-3xl border border-white/8 bg-zinc-950/70 p-4">
+    <section className="grid h-full min-h-0 grid-rows-[auto_auto_minmax(0,1fr)] rounded-3xl border border-white/8 bg-zinc-950/70 p-4 shadow-2xl shadow-black/20">
       <div className="mb-4 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
         <div>
           <h2 className="text-2xl font-black text-white">Orders</h2>
@@ -58,9 +58,11 @@ export function OrdersPage({ orders, currency, onDeleteOrder }: OrdersPageProps)
       </div>
 
       {filtered.length === 0 ? (
-        <EmptyState icon={ReceiptText} title="No orders found" body="Completed checkouts will be saved here for review and export." />
+        <div className="min-h-0 overflow-auto">
+          <EmptyState icon={ReceiptText} title="No orders found" body="Completed checkouts will be saved here for review and export." />
+        </div>
       ) : (
-        <div className="grid gap-3">
+        <div className="grid min-h-0 gap-3 overflow-auto pr-1">
           {filtered.map((order) => (
             <button key={order.id} className="grid gap-3 rounded-2xl border border-white/8 bg-zinc-900 p-4 text-left transition hover:border-blue-400/50 hover:bg-zinc-800 md:grid-cols-[1fr_auto]" onClick={() => setSelected(order)}>
               <div>

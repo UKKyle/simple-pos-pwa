@@ -5,7 +5,7 @@ class PosDatabase extends Dexie {
   products!: Table<Product, string>
   orders!: Table<Order, string>
   settings!: Table<Settings, string>
-  meta!: Table<{ key: string; value: number }, string>
+  meta!: Table<{ key: string; value: string | number | boolean }, string>
 
   constructor() {
     super('simple_pos_pwa')

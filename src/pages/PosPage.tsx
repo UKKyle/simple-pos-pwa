@@ -1,4 +1,4 @@
-import { ArrowLeft, ChevronRight, FolderOpen, Search, Tag, Truck, UserRound } from 'lucide-react'
+import { ArrowLeft, ChevronRight, Search, Tag, Truck, UserRound } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { CartPanel } from '../components/CartPanel'
 import { ProductTile } from '../components/ProductTile'
@@ -128,7 +128,7 @@ export function PosPage({
             <div className="flex items-center justify-between rounded-2xl border border-white/8 bg-zinc-900/60 px-4 py-3">
               <div>
                 <p className="text-xs font-bold uppercase tracking-[0.18em] text-blue-300">Collections</p>
-                <p className="mt-1 text-sm text-zinc-400">Use product tags to create grouped browsing like Cupcakes or Brownies.</p>
+                <p className="mt-1 text-sm text-zinc-400">Grouped tags appear as a clean browse list before the individual products.</p>
               </div>
               <div className="rounded-full bg-blue-500/15 px-3 py-1 text-xs font-bold text-blue-200 ring-1 ring-blue-400/20">
                 {visibleGroups.length} grouped
@@ -142,20 +142,25 @@ export function PosPage({
             visibleGroups.map((group) => (
               <button
                 key={group.tag}
-                className="group flex min-h-32 flex-col justify-between rounded-2xl border border-blue-400/20 bg-linear-to-br from-blue-500/18 via-zinc-900 to-zinc-900 p-4 text-left shadow-sm transition hover:-translate-y-0.5 hover:border-blue-400/60 hover:from-blue-500/24 focus:outline-none focus:ring-2 focus:ring-blue-500 lg:min-h-28"
+                className="group col-span-full flex items-center justify-between rounded-2xl border border-white/8 bg-zinc-900/85 px-4 py-4 text-left shadow-sm transition hover:border-blue-400/50 hover:bg-zinc-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 onClick={() => setSelectedTag(group.tag)}
               >
-                <div className="flex items-start justify-between gap-3">
-                  <span className="grid h-11 w-11 place-items-center rounded-xl bg-blue-500/15 text-blue-200 ring-1 ring-blue-400/20 lg:h-10 lg:w-10">
-                    <FolderOpen className="h-5 w-5" aria-hidden="true" />
+                <div className="flex min-w-0 items-center gap-4">
+                  <span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-blue-500/15 text-sm font-black text-blue-200 ring-1 ring-blue-400/20">
+                    {group.tag.slice(0, 2).toUpperCase()}
+                  </span>
+                  <span className="min-w-0">
+                    <span className="block truncate text-base font-bold leading-tight text-white">{group.tag}</span>
+                    <span className="mt-1 block text-sm font-medium text-zinc-400">
+                      {group.items.length} product{group.items.length === 1 ? '' : 's'}
+                    </span>
+                  </span>
+                </div>
+                <span className="flex items-center gap-3">
+                  <span className="hidden text-sm font-semibold text-zinc-500 md:inline">
+                    View
                   </span>
                   <ChevronRight className="h-5 w-5 text-zinc-500 transition group-hover:text-blue-200" aria-hidden="true" />
-                </div>
-                <span>
-                  <span className="block text-base font-bold leading-tight text-white lg:text-lg">{group.tag}</span>
-                  <span className="mt-2 block text-sm font-semibold text-zinc-400">
-                    {group.items.length} product{group.items.length === 1 ? '' : 's'}
-                  </span>
                 </span>
               </button>
             ))}
