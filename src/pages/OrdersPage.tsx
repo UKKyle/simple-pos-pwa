@@ -1,0 +1,119 @@
+import { Download, ReceiptText, Search, Trash2 } from 'lucide-react'
+import { useMemo, useState } from 'react'
+import { EmptyState } from '../components/EmptyState'
+import { Modal } from '../components/Modal'
+import type { Order, PaymentMethod } from '../types'
+import { downloadOrdersCsv } from '../utils/csv'
+import { formatCurrency } from '../utils/currency'
+
+interface OrdersPageProps {
+  orders: Order[]
+  currency: string
+  onDeleteOrder: (id: string) => void
+}
+
+export function OrdersPage({ orders, currency, onDeleteOrder }: OrdersPageProps) {
+  const [search, setSearch] = useState('')
+  const [method, setMethod] = useState<'all' | PaymentMethod>('all')
+  const [selected, setSelected] = useState<Order | null>(null)
+
+  const filtered = useMemo(() => {
+    const term = search.trim().toLowerCase()
+    return orders.filter((order) => {
+      const matchesMethod = method === 'all' || order.paymentMethod === method
+      const matchesSearch =
+        !term ||
+        order.orderNumber.toLowerCase().includes(term) ||
+        order.customerEmail?.toLowerCase().includes(term)
+      return matchesMethod && matchesSearch
+    })
+  }, [orders, search, method])
+
+  return (
+    <section className="rounded-3xl border border-white/8 bg-zinc-950/70 p-4">
+      <div className="mb-4 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+        <div>
+          <h2 className="text-2xl font-black text-white">Orders</h2>
+          <p className="text-sm text-zinc-400">Newest paid orders appear first.</p>
+        </div>
+        <button className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-zinc-900 px-4 text-sm font-bold text-white hover:bg-zinc-800 disabled:opacity-40" onClick={() => downloadOrdersCsv(filtered)} disabled={filtered.length === 0}>
+          <Download className="h-4 w-4" aria-hidden="true" />
+          Export CSV
+        </button>
+      </div>
+
+      <div className="mb-4 grid gap-3 md:grid-cols-[1fr_auto]">
+        <label className="relative block">
+          <span className="sr-only">Search orders</span>
+          <Search className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-zinc-400" aria-hidden="true" />
+          <input className="h-12 w-full rounded-xl border border-white/10 bg-zinc-900 pl-12 pr-4 text-white outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search reference or email" />
+        </label>
+        <div className="grid grid-cols-3 rounded-xl bg-zinc-900 p-1">
+          {(['all', 'card', 'cash'] as const).map((option) => (
+            <button key={option} className={`h-10 rounded-lg px-4 text-sm font-bold capitalize ${method === option ? 'bg-blue-500 text-white' : 'text-zinc-400 hover:text-white'}`} onClick={() => setMethod(option)}>
+              {option}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {filtered.length === 0 ? (
+        <EmptyState icon={ReceiptText} title="No orders found" body="Completed checkouts will be saved here for review and export." />
+      ) : (
+        <div className="grid gap-3">
+          {filtered.map((order) => (
+            <button key={order.id} className="grid gap-3 rounded-2xl border border-white/8 bg-zinc-900 p-4 text-left transition hover:border-blue-400/50 hover:bg-zinc-800 md:grid-cols-[1fr_auto]" onClick={() => setSelected(order)}>
+              <div>
+                <p className="text-lg font-black text-white">{order.orderNumber}</p>
+                <p className="mt-1 text-sm text-zinc-400">{new Date(order.createdAt).toLocaleString('en-GB')}</p>
+                {order.customerEmail && <p className="mt-1 text-sm text-blue-300">{order.customerEmail}</p>}
+              </div>
+              <div className="text-left md:text-right">
+                <p className="text-xl font-black text-white">{formatCurrency(order.total, currency)}</p>
+                <p className="mt-1 text-sm font-semibold capitalize text-zinc-400">
+                  {order.paymentMethod} · {order.items.reduce((sum, item) => sum + item.quantity, 0)} items
+                </p>
+              </div>
+            </button>
+          ))}
+        </div>
+      )}
+
+      {selected && (
+        <Modal title={selected.orderNumber} onClose={() => setSelected(null)}>
+          <div className="space-y-4">
+            <div className="rounded-2xl bg-zinc-900 p-4 text-sm text-zinc-300">
+              <p>{new Date(selected.createdAt).toLocaleString('en-GB')}</p>
+              <p className="mt-1 capitalize">Paid by {selected.paymentMethod}</p>
+              {selected.customerEmail && <p className="mt-1 text-blue-300">{selected.customerEmail}</p>}
+            </div>
+            <div className="space-y-2">
+              {selected.items.map((item) => (
+                <div key={item.productId} className="flex justify-between gap-3 rounded-xl bg-zinc-900 p-3 text-sm">
+                  <span className="text-white">{item.quantity}x {item.name}</span>
+                  <span className="font-bold text-white">{formatCurrency(item.price * item.quantity, currency)}</span>
+                </div>
+              ))}
+            </div>
+            <div className="flex justify-between text-xl font-black text-white">
+              <span>Total</span>
+              <span>{formatCurrency(selected.total, currency)}</span>
+            </div>
+            <button
+              className="inline-flex h-11 items-center gap-2 rounded-xl bg-red-500/15 px-4 text-sm font-bold text-red-200 hover:bg-red-500/25"
+              onClick={() => {
+                if (confirm(`Delete ${selected.orderNumber}?`)) {
+                  onDeleteOrder(selected.id)
+                  setSelected(null)
+                }
+              }}
+            >
+              <Trash2 className="h-4 w-4" aria-hidden="true" />
+              Delete order
+            </button>
+          </div>
+        </Modal>
+      )}
+    </section>
+  )
+}
