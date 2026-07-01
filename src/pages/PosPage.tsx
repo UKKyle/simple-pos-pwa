@@ -124,17 +124,7 @@ export function PosPage({
               <ArrowLeft className="h-4 w-4" aria-hidden="true" />
               Back to collections
             </button>
-          ) : (
-            <div className="flex items-center justify-between rounded-2xl border border-white/8 bg-zinc-900/60 px-4 py-3">
-              <div>
-                <p className="text-xs font-bold uppercase tracking-[0.18em] text-blue-300">Collections</p>
-                <p className="mt-1 text-sm text-zinc-400">Grouped tags appear as a clean browse list before the individual products.</p>
-              </div>
-              <div className="rounded-full bg-blue-500/15 px-3 py-1 text-xs font-bold text-blue-200 ring-1 ring-blue-400/20">
-                {visibleGroups.length} grouped
-              </div>
-            </div>
-          )}
+          ) : null}
         </div>
 
         <div className="mt-4 grid min-h-0 content-start gap-3 overflow-auto pr-1 sm:grid-cols-2 lg:auto-rows-fr 2xl:grid-cols-3">
@@ -164,6 +154,14 @@ export function PosPage({
                 </span>
               </button>
             ))}
+
+          {!selectedGroup && visibleGroups.length > 0 && visibleUngroupedProducts.length > 0 && (
+            <div className="col-span-full mt-1 flex items-center gap-3 px-1 pt-2">
+              <div className="h-px flex-1 bg-white/8" />
+              <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-zinc-500">Products</p>
+              <div className="h-px flex-1 bg-white/8" />
+            </div>
+          )}
 
           {visibleProducts.map((product) => (
             <ProductTile key={product.id} product={product} currency={currency} onAdd={onAddProduct} />

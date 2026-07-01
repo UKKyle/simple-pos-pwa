@@ -72,8 +72,8 @@ export function ProductsPage({ products, currency, onAddProduct, onUpdateProduct
   }
 
   return (
-    <section className="grid gap-4 xl:grid-cols-[380px_1fr]">
-      <form className="rounded-3xl border border-white/8 bg-zinc-950/70 p-4" onSubmit={submit}>
+    <section className="grid h-full min-h-0 gap-4 xl:grid-cols-[380px_minmax(0,1fr)]">
+      <form className="overflow-auto rounded-3xl border border-white/8 bg-zinc-950/70 p-4 shadow-2xl shadow-black/20" onSubmit={submit}>
         <h2 className="text-2xl font-black text-white">{editingId ? 'Edit product' : 'Add product'}</h2>
         <label className="mt-5 block">
           <span className="mb-2 block text-sm font-bold text-zinc-300">Product name</span>
@@ -91,7 +91,7 @@ export function ProductsPage({ products, currency, onAddProduct, onUpdateProduct
             onChange={(event) => setTag(event.target.value)}
             placeholder="Cupcakes"
           />
-          <p className="mt-2 text-xs text-zinc-500">Products with the same tag appear together under one collection tile in the POS.</p>
+          <p className="mt-2 text-xs text-zinc-500">Use the same tag on multiple products to create one collection row in the POS, such as Cupcakes.</p>
         </label>
         {error && <p className="mt-4 rounded-xl bg-red-500/10 px-3 py-2 text-sm font-semibold text-red-200">{error}</p>}
         <div className="mt-5 flex gap-3">
@@ -107,16 +107,18 @@ export function ProductsPage({ products, currency, onAddProduct, onUpdateProduct
         </div>
       </form>
 
-      <div className="rounded-3xl border border-white/8 bg-zinc-950/70 p-4">
+      <div className="grid min-h-0 grid-rows-[auto_minmax(0,1fr)] rounded-3xl border border-white/8 bg-zinc-950/70 p-4 shadow-2xl shadow-black/20">
         <label className="relative mb-4 block">
           <span className="sr-only">Search products</span>
           <Search className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-zinc-400" aria-hidden="true" />
           <input className="h-12 w-full rounded-xl border border-white/10 bg-zinc-900 pl-12 pr-4 text-white outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search products" />
         </label>
         {filtered.length === 0 ? (
-          <EmptyState icon={Package} title="No products" body="Add products with a name and price to make them available in the POS grid." />
+          <div className="min-h-0 overflow-auto">
+            <EmptyState icon={Package} title="No products" body="Add products with a name and price to make them available in the POS grid." />
+          </div>
         ) : (
-          <div className="grid gap-3">
+          <div className="grid min-h-0 gap-3 overflow-auto pr-1">
             {filtered.map((product) => (
               <div key={product.id} className="grid gap-3 rounded-2xl bg-zinc-900 p-4 md:grid-cols-[1fr_auto] md:items-center">
                 <div>
