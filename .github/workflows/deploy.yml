@@ -30,8 +30,8 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Install Tailwind Linux binding
-        run: npm install @tailwindcss/oxide-linux-x64-gnu@4.3.2 --no-save
+      - name: Install Linux native bindings
+        run: npm install @tailwindcss/oxide-linux-x64-gnu@4.3.2 @rollup/rollup-linux-x64-gnu@4.53.3 --no-save
 
       - name: Build
         run: npm run build
