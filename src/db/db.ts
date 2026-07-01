@@ -21,6 +21,12 @@ class PosDatabase extends Dexie {
       settings: 'id',
       meta: 'key',
     })
+    this.version(3).stores({
+      products: 'id, name, active, tag, createdAt, updatedAt',
+      orders: 'id, orderNumber, createdAt, paymentMethod, customerEmail, syncStatus, cmsOrderId',
+      settings: 'id',
+      meta: 'key',
+    })
   }
 }
 

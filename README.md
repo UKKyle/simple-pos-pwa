@@ -6,9 +6,9 @@ A clean, dark, tablet-first point of sale Progressive Web App for small business
 
 - POS product grid with search and one-tap add to basket
 - Basket quantity controls, item removal, clear cart, subtotal, total, and item count
-- Optional customer email validation
-- Mark paid by Card or Cash, with completed orders saved locally
-- Orders tab with search, payment-method filtering, details modal, delete, and CSV export
+- Optional customer name, email, and phone capture
+- Mark paid by Card or Cash, with completed orders saved locally first and then synced to the Baked By Mady CMS
+- Orders tab with search, payment-method filtering, CMS sync status, manual retry, details modal, delete, and CSV export
 - Products tab with add, edit, delete, active toggle, search, duplicate-name prevention, and validation
 - Settings tab for business name, currency, demo reset, and full local-data clearing
 - IndexedDB persistence via Dexie
@@ -28,6 +28,17 @@ npm run dev
 npm run build
 npm run preview
 ```
+
+## CMS Sync Configuration
+
+Create a local `.env` file from `.env.example` and set:
+
+```bash
+VITE_BBM_POS_INGEST_URL=
+VITE_BBM_POS_INGEST_SECRET=
+```
+
+These `VITE_` variables are exposed to the built client, so this setup is only appropriate for a private staff-operated POS. The Baked By Mady CMS still protects the ingest endpoint with origin checks, payload validation, duplicate detection, and a shared secret, but this should not be treated as a public untrusted client credential model.
 
 ## Deployment
 
@@ -50,7 +61,7 @@ The Vite `base` path is set to `/simple-pos-pwa/` for GitHub Pages.
 ## Current Limitations
 
 - No payment provider or card reader integration
-- Local device storage only, with no cloud sync or staff accounts
+- Sync uses a private client-visible shared secret, so this is designed for trusted staff devices rather than a public app
 - Tax, discounts, refunds, receipts, and inventory tracking are not implemented yet
 
 ## Future Upgrade Path

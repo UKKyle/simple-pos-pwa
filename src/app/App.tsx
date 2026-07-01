@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Layout } from '../components/Layout'
 import { Toast } from '../components/Toast'
 import { clearAllData, ensureSeedData, resetDemoData } from '../db/seed'
@@ -16,16 +16,28 @@ import { isValidEmail } from '../utils/validation'
 export function App() {
   const [ready, setReady] = useState(false)
   const [activeTab, setActiveTab] = useState<Tab>('pos')
+  const [customerName, setCustomerName] = useState('')
   const [customerEmail, setCustomerEmail] = useState('')
+  const [customerPhone, setCustomerPhone] = useState('')
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod | ''>('')
   const [checkoutError, setCheckoutError] = useState<string | null>(null)
   const [toast, setToast] = useState<string | null>(null)
+  const [online, setOnline] = useState(() => navigator.onLine)
   const bootstrapped = useRef(false)
 
   const products = useProducts()
   const orders = useOrders()
   const settings = useSettings()
   const cart = useCart()
+  const { refresh: refreshProducts } = products
+  const { refresh: refreshOrders, syncPendingOrders, createOrder, deleteOrder, pendingSyncCount, syncing } = orders
+  const { refresh: refreshSettings } = settings
+
+  const syncContext = useMemo(() => ({
+    currency: settings.settings.currency,
+    businessName: settings.settings.businessName,
+    posLocation: settings.settings.businessName,
+  }), [settings.settings.businessName, settings.settings.currency])
 
   const notify = (message: string) => {
     setToast(message)
@@ -36,10 +48,40 @@ export function App() {
     if (bootstrapped.current) return
     bootstrapped.current = true
     void ensureSeedData().then(async () => {
-      await Promise.all([products.refresh(), orders.refresh(), settings.refresh()])
+      await Promise.all([refreshProducts(), refreshOrders(), refreshSettings()])
       setReady(true)
     })
-  }, [orders.refresh, products.refresh, settings.refresh])
+  }, [refreshOrders, refreshProducts, refreshSettings])
+
+  useEffect(() => {
+    if (!ready) return
+    void syncPendingOrders(syncContext).then((result) => {
+      if (result.total > 0 && result.syncedCount > 0 && result.failedCount === 0) {
+        notify(`Synced ${result.syncedCount} pending order${result.syncedCount === 1 ? '' : 's'} to CMS`)
+      }
+    })
+  }, [ready, syncContext, syncPendingOrders])
+
+  useEffect(() => {
+    const handleOnline = () => {
+      setOnline(true)
+      void syncPendingOrders(syncContext).then((result) => {
+        if (result.syncedCount > 0) {
+          notify(`Recovered ${result.syncedCount} order${result.syncedCount === 1 ? '' : 's'} to CMS`)
+        }
+      })
+    }
+
+    const handleOffline = () => setOnline(false)
+
+    window.addEventListener('online', handleOnline)
+    window.addEventListener('offline', handleOffline)
+
+    return () => {
+      window.removeEventListener('online', handleOnline)
+      window.removeEventListener('offline', handleOffline)
+    }
+  }, [syncContext, syncPendingOrders])
 
   const checkout = async () => {
     setCheckoutError(null)
@@ -47,17 +89,29 @@ export function App() {
     if (!paymentMethod) return setCheckoutError('Choose card or cash before marking paid.')
     if (customerEmail.trim() && !isValidEmail(customerEmail.trim())) return setCheckoutError('Enter a valid customer email address.')
 
-    const order = await orders.createOrder({
+    const order = await createOrder({
       items: cart.items,
       subtotal: cart.totals.subtotal,
       total: cart.totals.total,
       paymentMethod,
+      customerName: customerName.trim() || undefined,
       customerEmail: customerEmail.trim() || undefined,
-    })
+      customerPhone: customerPhone.trim() || undefined,
+      notes: '',
+    }, syncContext)
+
     cart.clearCart()
+    setCustomerName('')
     setCustomerEmail('')
+    setCustomerPhone('')
     setPaymentMethod('')
-    notify(`${order.orderNumber} saved`)
+
+    if (order.syncStatus === 'synced') {
+      notify(`${order.orderNumber} saved and synced to CMS`)
+    } else {
+      notify(`${order.orderNumber} saved locally. CMS sync will retry automatically.`)
+    }
+
     setActiveTab('orders')
   }
 
@@ -71,21 +125,31 @@ export function App() {
 
   return (
     <>
-      <Layout activeTab={activeTab} businessName={settings.settings.businessName} onTabChange={setActiveTab}>
+      <Layout
+        activeTab={activeTab}
+        businessName={settings.settings.businessName}
+        pendingSyncCount={pendingSyncCount}
+        online={online}
+        onTabChange={setActiveTab}
+      >
         {activeTab === 'pos' && (
           <PosPage
             products={products.products}
             cartItems={cart.items}
             totals={cart.totals}
             currency={settings.settings.currency}
+            customerName={customerName}
             customerEmail={customerEmail}
+            customerPhone={customerPhone}
             paymentMethod={paymentMethod}
             checkoutError={checkoutError}
             onAddProduct={(product) => {
               cart.addProduct(product)
               setCheckoutError(null)
             }}
+            onCustomerNameChange={setCustomerName}
             onCustomerEmailChange={setCustomerEmail}
+            onCustomerPhoneChange={setCustomerPhone}
             onPaymentMethodChange={setPaymentMethod}
             onQuantityChange={cart.setQuantity}
             onRemoveItem={cart.removeItem}
@@ -93,7 +157,25 @@ export function App() {
             onCheckout={() => void checkout()}
           />
         )}
-        {activeTab === 'orders' && <OrdersPage orders={orders.orders} currency={settings.settings.currency} onDeleteOrder={(id) => void orders.deleteOrder(id).then(() => notify('Order deleted'))} />}
+        {activeTab === 'orders' && (
+          <OrdersPage
+            orders={orders.orders}
+            currency={settings.settings.currency}
+            syncing={syncing}
+            onDeleteOrder={(id) => void deleteOrder(id).then(() => notify('Order deleted'))}
+            onSyncPendingOrders={() => {
+              void syncPendingOrders(syncContext).then((result) => {
+                if (result.total === 0) {
+                  notify('No pending orders to sync')
+                } else if (result.failedCount > 0) {
+                  notify(`Synced ${result.syncedCount} order${result.syncedCount === 1 ? '' : 's'}, ${result.failedCount} still need attention`)
+                } else {
+                  notify(`Synced ${result.syncedCount} pending order${result.syncedCount === 1 ? '' : 's'}`)
+                }
+              })
+            }}
+          />
+        )}
         {activeTab === 'products' && (
           <ProductsPage
             products={products.products}
@@ -110,11 +192,11 @@ export function App() {
             onSave={settings.saveSettings}
             onResetDemo={async () => {
               await resetDemoData()
-              await Promise.all([products.refresh(), orders.refresh(), settings.refresh()])
+              await Promise.all([refreshProducts(), refreshOrders(), refreshSettings()])
             }}
             onClearAll={async () => {
               await clearAllData()
-              await Promise.all([products.refresh(), orders.refresh(), settings.refresh()])
+              await Promise.all([refreshProducts(), refreshOrders(), refreshSettings()])
             }}
             onNotify={notify}
           />

@@ -7,13 +7,17 @@ function escapeCsv(value: string | number | undefined) {
 
 export function downloadOrdersCsv(orders: Order[]) {
   const rows = [
-    ['orderNumber', 'createdAt', 'customerEmail', 'paymentMethod', 'total', 'itemSummary'],
+    ['orderNumber', 'createdAt', 'customerName', 'customerEmail', 'customerPhone', 'paymentMethod', 'total', 'syncStatus', 'cmsOrderNumber', 'itemSummary'],
     ...orders.map((order) => [
       order.orderNumber,
       order.createdAt,
+      order.customerName ?? '',
       order.customerEmail ?? '',
+      order.customerPhone ?? '',
       order.paymentMethod,
       order.total,
+      order.syncStatus,
+      order.cmsOrderNumber ?? '',
       order.items.map((item) => `${item.quantity}x ${item.name}`).join('; '),
     ]),
   ]

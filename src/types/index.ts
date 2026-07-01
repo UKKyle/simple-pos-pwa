@@ -1,4 +1,6 @@
-export type PaymentMethod = 'card' | 'cash'
+export type PaymentMethod = 'card' | 'cash' | 'other'
+export type PaymentStatus = 'paid' | 'pending' | 'failed' | 'cancelled'
+export type OrderSyncStatus = 'synced' | 'pending' | 'failed'
 
 export interface Product {
   id: string
@@ -24,8 +26,16 @@ export interface Order {
   subtotal: number
   total: number
   paymentMethod: PaymentMethod
-  paymentStatus: 'paid'
+  paymentStatus: PaymentStatus
+  customerName?: string
   customerEmail?: string
+  customerPhone?: string
+  notes?: string
+  syncStatus: OrderSyncStatus
+  cmsOrderId?: string
+  cmsOrderNumber?: number
+  lastSyncAttemptAt?: string
+  syncError?: string
   createdAt: string
 }
 

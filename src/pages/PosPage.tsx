@@ -10,11 +10,15 @@ interface PosPageProps {
   cartItems: CartItem[]
   totals: { subtotal: number; total: number; itemCount: number }
   currency: string
+  customerName: string
   customerEmail: string
+  customerPhone: string
   paymentMethod: PaymentMethod | ''
   checkoutError: string | null
   onAddProduct: (product: Product) => void
+  onCustomerNameChange: (value: string) => void
   onCustomerEmailChange: (value: string) => void
+  onCustomerPhoneChange: (value: string) => void
   onPaymentMethodChange: (value: PaymentMethod) => void
   onQuantityChange: (productId: string, value: number) => void
   onRemoveItem: (productId: string) => void
@@ -27,11 +31,15 @@ export function PosPage({
   cartItems,
   totals,
   currency,
+  customerName,
   customerEmail,
+  customerPhone,
   paymentMethod,
   checkoutError,
   onAddProduct,
+  onCustomerNameChange,
   onCustomerEmailChange,
+  onCustomerPhoneChange,
   onPaymentMethodChange,
   onQuantityChange,
   onRemoveItem,
@@ -243,10 +251,14 @@ export function PosPage({
         total={totals.total}
         itemCount={totals.itemCount}
         currency={currency}
+        customerName={customerName}
         customerEmail={customerEmail}
+        customerPhone={customerPhone}
         paymentMethod={paymentMethod}
         error={checkoutError}
+        onCustomerNameChange={onCustomerNameChange}
         onCustomerEmailChange={onCustomerEmailChange}
+        onCustomerPhoneChange={onCustomerPhoneChange}
         onPaymentMethodChange={onPaymentMethodChange}
         onQuantityChange={onQuantityChange}
         onRemove={onRemoveItem}

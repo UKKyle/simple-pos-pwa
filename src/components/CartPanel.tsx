@@ -9,10 +9,14 @@ interface CartPanelProps {
   total: number
   itemCount: number
   currency: string
+  customerName: string
   customerEmail: string
+  customerPhone: string
   paymentMethod: PaymentMethod | ''
   error: string | null
+  onCustomerNameChange: (value: string) => void
   onCustomerEmailChange: (value: string) => void
+  onCustomerPhoneChange: (value: string) => void
   onPaymentMethodChange: (value: PaymentMethod) => void
   onQuantityChange: (productId: string, value: number) => void
   onRemove: (productId: string) => void
@@ -26,10 +30,14 @@ export function CartPanel({
   total,
   itemCount,
   currency,
+  customerName,
   customerEmail,
+  customerPhone,
   paymentMethod,
   error,
+  onCustomerNameChange,
   onCustomerEmailChange,
+  onCustomerPhoneChange,
   onPaymentMethodChange,
   onQuantityChange,
   onRemove,
@@ -48,19 +56,48 @@ export function CartPanel({
         </button>
       </div>
 
-      <label className="mb-4 block">
-        <span className="mb-2 flex items-center gap-2 text-sm font-semibold text-zinc-300">
-          <UserRound className="h-4 w-4 text-blue-400" aria-hidden="true" />
-          Customer email
-        </span>
-        <input
-          className="h-12 w-full rounded-xl border border-white/10 bg-zinc-900 px-4 text-white outline-none transition placeholder:text-zinc-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30"
-          type="email"
-          value={customerEmail}
-          onChange={(event) => onCustomerEmailChange(event.target.value)}
-          placeholder="optional@email.co.uk"
-        />
-      </label>
+      <div className="mb-4 grid gap-3">
+        <label className="block">
+          <span className="mb-2 flex items-center gap-2 text-sm font-semibold text-zinc-300">
+            <UserRound className="h-4 w-4 text-blue-400" aria-hidden="true" />
+            Customer name
+          </span>
+          <input
+            className="h-12 w-full rounded-xl border border-white/10 bg-zinc-900 px-4 text-white outline-none transition placeholder:text-zinc-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30"
+            value={customerName}
+            onChange={(event) => onCustomerNameChange(event.target.value)}
+            placeholder="Optional walk-in name"
+          />
+        </label>
+
+        <label className="block">
+          <span className="mb-2 flex items-center gap-2 text-sm font-semibold text-zinc-300">
+            <UserRound className="h-4 w-4 text-blue-400" aria-hidden="true" />
+            Customer email
+          </span>
+          <input
+            className="h-12 w-full rounded-xl border border-white/10 bg-zinc-900 px-4 text-white outline-none transition placeholder:text-zinc-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30"
+            type="email"
+            value={customerEmail}
+            onChange={(event) => onCustomerEmailChange(event.target.value)}
+            placeholder="optional@email.co.uk"
+          />
+        </label>
+
+        <label className="block">
+          <span className="mb-2 flex items-center gap-2 text-sm font-semibold text-zinc-300">
+            <UserRound className="h-4 w-4 text-blue-400" aria-hidden="true" />
+            Customer phone
+          </span>
+          <input
+            className="h-12 w-full rounded-xl border border-white/10 bg-zinc-900 px-4 text-white outline-none transition placeholder:text-zinc-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30"
+            type="tel"
+            value={customerPhone}
+            onChange={(event) => onCustomerPhoneChange(event.target.value)}
+            placeholder="Optional contact number"
+          />
+        </label>
+      </div>
 
       <div className="min-h-0 flex-1 space-y-3 overflow-auto pr-1">
         {items.length === 0 ? (
