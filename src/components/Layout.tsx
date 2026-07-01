@@ -12,12 +12,12 @@ interface LayoutProps {
 
 export function Layout({ activeTab, businessName, children, onTabChange }: LayoutProps) {
   return (
-    <div className="min-h-dvh bg-black text-white">
-      <div className="flex min-h-dvh">
+    <div className="h-dvh overflow-hidden bg-black text-white">
+      <div className="flex h-full overflow-hidden">
         <Sidebar activeTab={activeTab} onChange={onTabChange} />
-        <div className="flex min-w-0 flex-1 flex-col pb-20 md:pb-0">
+        <div className="flex min-w-0 flex-1 flex-col overflow-hidden pb-20 md:pb-0">
           <TopBar businessName={businessName} />
-          <main className="min-h-0 flex-1 overflow-auto p-3 md:p-5">{children}</main>
+          <main className="min-h-0 flex-1 overflow-hidden p-3 md:p-4 lg:p-5">{children}</main>
         </div>
       </div>
     </div>

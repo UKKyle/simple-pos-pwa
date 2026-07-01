@@ -17,14 +17,14 @@ export function ProductTile({ product, currency, onAdd }: ProductTileProps) {
 
   return (
     <button
-      className="group flex min-h-36 flex-col justify-between rounded-2xl border border-white/8 bg-zinc-900 p-4 text-left shadow-sm transition hover:-translate-y-0.5 hover:border-blue-400/60 hover:bg-zinc-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
+      className="group flex min-h-32 flex-col justify-between rounded-2xl border border-white/8 bg-zinc-900 p-4 text-left shadow-sm transition hover:-translate-y-0.5 hover:border-blue-400/60 hover:bg-zinc-800 focus:outline-none focus:ring-2 focus:ring-blue-500 lg:min-h-28"
       onClick={() => onAdd(product)}
     >
-      <span className="grid h-12 w-12 place-items-center rounded-xl bg-blue-500/15 text-sm font-black text-blue-300 ring-1 ring-blue-400/20">
+      <span className="grid h-11 w-11 place-items-center rounded-xl bg-blue-500/15 text-sm font-black text-blue-300 ring-1 ring-blue-400/20 lg:h-10 lg:w-10">
         {initials}
       </span>
       <span>
-        <span className="line-clamp-2 block text-lg font-bold leading-tight text-white">{product.name}</span>
+        <span className="line-clamp-2 block text-base font-bold leading-tight text-white lg:text-lg">{product.name}</span>
         <span className="mt-2 block text-sm font-semibold text-zinc-400">{formatCurrency(product.price, currency)}</span>
       </span>
     </button>

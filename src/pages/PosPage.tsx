@@ -51,8 +51,8 @@ export function PosPage({
   }, [products, search])
 
   return (
-    <div className="grid h-full gap-4 lg:grid-cols-[minmax(0,1fr)_360px] xl:grid-cols-[minmax(0,1fr)_420px]">
-      <section className="min-w-0 rounded-3xl border border-white/8 bg-zinc-950/70 p-4">
+    <div className="grid h-full min-h-0 gap-4 lg:grid-cols-[minmax(0,1fr)_360px] lg:overflow-hidden xl:grid-cols-[minmax(0,1fr)_420px]">
+      <section className="grid min-h-0 min-w-0 grid-rows-[auto_minmax(0,1fr)] rounded-3xl border border-white/8 bg-zinc-950/70 p-4 shadow-2xl shadow-black/20">
         <label className="relative block">
           <span className="sr-only">Search products</span>
           <Search className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-zinc-400" aria-hidden="true" />
@@ -64,14 +64,14 @@ export function PosPage({
           />
         </label>
 
-        <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 2xl:grid-cols-3">
+        <div className="mt-4 grid min-h-0 content-start gap-3 overflow-auto pr-1 sm:grid-cols-2 lg:auto-rows-fr 2xl:grid-cols-3">
           {activeProducts.map((product) => (
             <ProductTile key={product.id} product={product} currency={currency} onAdd={onAddProduct} />
           ))}
           {quickActions.map(({ label, icon: Icon }) => (
-            <div key={label} className="flex min-h-36 flex-col justify-between rounded-2xl border border-white/8 bg-zinc-900 p-4">
+            <div key={label} className="flex min-h-32 flex-col justify-between rounded-2xl border border-white/8 bg-zinc-900 p-4 lg:min-h-28">
               <Icon className="h-6 w-6 text-blue-400" aria-hidden="true" />
-              <p className="text-lg font-bold text-white">{label}</p>
+              <p className="text-base font-bold text-white lg:text-lg">{label}</p>
             </div>
           ))}
         </div>

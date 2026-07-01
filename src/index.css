@@ -12,11 +12,19 @@ html {
   color-scheme: dark;
 }
 
+html,
+body,
+#root {
+  height: 100%;
+}
+
 body {
   margin: 0;
   min-width: 320px;
   background: #000;
   font-family: var(--font-sans);
+  overflow: hidden;
+  overscroll-behavior: none;
 }
 
 button,
