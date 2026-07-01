@@ -1,4 +1,4 @@
-# Simple POS PWA
+# Simple POS PWA.
 
 A clean, dark, tablet-first point of sale Progressive Web App for small businesses. It is an original implementation inspired by common modern POS interaction patterns: fast product tiles, a persistent basket on larger screens, touch-friendly controls, local order storage, and simple product management.
 
