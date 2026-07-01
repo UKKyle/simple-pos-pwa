@@ -3,10 +3,10 @@ import type { Product, Settings } from '../types'
 import { createId } from '../utils/ids'
 
 const demoProducts = [
-  ['Chocolate Brownie Box', 12],
-  ['Vanilla Cupcake Box', 15],
-  ['Custom Cake Deposit', 20],
-  ['Delivery Fee', 5],
+  ['Chocolate Brownie Box', 12, 'Brownies'],
+  ['Vanilla Cupcake Box', 15, 'Cupcakes'],
+  ['Custom Cake Deposit', 20, undefined],
+  ['Delivery Fee', 5, undefined],
 ] as const
 
 export async function ensureSeedData() {
@@ -26,10 +26,11 @@ export async function ensureSeedData() {
 
   if (productCount === 0) {
     const now = new Date().toISOString()
-    const products: Product[] = demoProducts.map(([name, price]) => ({
+    const products: Product[] = demoProducts.map(([name, price, tag]) => ({
       id: createId('product'),
       name,
       price,
+      tag,
       active: true,
       createdAt: now,
       updatedAt: now,

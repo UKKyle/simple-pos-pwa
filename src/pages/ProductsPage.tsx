@@ -9,8 +9,8 @@ import { parsePrice } from '../utils/validation'
 interface ProductsPageProps {
   products: Product[]
   currency: string
-  onAddProduct: (name: string, price: number) => Promise<void>
-  onUpdateProduct: (id: string, patch: Pick<Product, 'name' | 'price' | 'active'>) => Promise<void>
+  onAddProduct: (name: string, price: number, tag: string) => Promise<void>
+  onUpdateProduct: (id: string, patch: Pick<Product, 'name' | 'price' | 'active' | 'tag'>) => Promise<void>
   onDeleteProduct: (id: string) => Promise<void>
   onNotify: (message: string) => void
 }
@@ -20,17 +20,25 @@ export function ProductsPage({ products, currency, onAddProduct, onUpdateProduct
   const [editingId, setEditingId] = useState<string | null>(null)
   const [name, setName] = useState('')
   const [price, setPrice] = useState('')
+  const [tag, setTag] = useState('')
   const [error, setError] = useState<string | null>(null)
 
   const filtered = useMemo(() => {
     const term = search.trim().toLowerCase()
-    return products.filter((product) => !term || product.name.toLowerCase().includes(term))
+    return products.filter((product) => {
+      if (!term) return true
+      return (
+        product.name.toLowerCase().includes(term) ||
+        product.tag?.toLowerCase().includes(term)
+      )
+    })
   }, [products, search])
 
   const resetForm = () => {
     setEditingId(null)
     setName('')
     setPrice('')
+    setTag('')
     setError(null)
   }
 
@@ -43,10 +51,10 @@ export function ProductsPage({ products, currency, onAddProduct, onUpdateProduct
     try {
       if (editingId) {
         const current = products.find((product) => product.id === editingId)
-        await onUpdateProduct(editingId, { name, price: parsedPrice, active: current?.active ?? true })
+        await onUpdateProduct(editingId, { name, price: parsedPrice, tag, active: current?.active ?? true })
         onNotify('Product updated')
       } else {
-        await onAddProduct(name, parsedPrice)
+        await onAddProduct(name, parsedPrice, tag)
         onNotify('Product added')
       }
       resetForm()
@@ -59,6 +67,7 @@ export function ProductsPage({ products, currency, onAddProduct, onUpdateProduct
     setEditingId(product.id)
     setName(product.name)
     setPrice(String(product.price))
+    setTag(product.tag ?? '')
     setError(null)
   }
 
@@ -73,6 +82,16 @@ export function ProductsPage({ products, currency, onAddProduct, onUpdateProduct
         <label className="mt-4 block">
           <span className="mb-2 block text-sm font-bold text-zinc-300">Price</span>
           <input className="h-12 w-full rounded-xl border border-white/10 bg-zinc-900 px-4 text-white outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30" value={price} onChange={(event) => setPrice(event.target.value)} inputMode="decimal" />
+        </label>
+        <label className="mt-4 block">
+          <span className="mb-2 block text-sm font-bold text-zinc-300">Group tag</span>
+          <input
+            className="h-12 w-full rounded-xl border border-white/10 bg-zinc-900 px-4 text-white outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30"
+            value={tag}
+            onChange={(event) => setTag(event.target.value)}
+            placeholder="Cupcakes"
+          />
+          <p className="mt-2 text-xs text-zinc-500">Products with the same tag appear together under one collection tile in the POS.</p>
         </label>
         {error && <p className="mt-4 rounded-xl bg-red-500/10 px-3 py-2 text-sm font-semibold text-red-200">{error}</p>}
         <div className="mt-5 flex gap-3">
@@ -103,10 +122,11 @@ export function ProductsPage({ products, currency, onAddProduct, onUpdateProduct
                 <div>
                   <p className="font-black text-white">{product.name}</p>
                   <p className="mt-1 text-sm text-zinc-400">{formatCurrency(product.price, currency)}</p>
+                  {product.tag && <p className="mt-2 inline-flex rounded-full bg-blue-500/15 px-2.5 py-1 text-xs font-bold text-blue-200 ring-1 ring-blue-400/20">{product.tag}</p>}
                 </div>
                 <div className="flex flex-wrap items-center gap-2">
                   <label className="flex h-10 items-center gap-2 rounded-xl bg-zinc-800 px-3 text-sm font-bold text-zinc-300">
-                    <input type="checkbox" checked={product.active} onChange={(event) => void onUpdateProduct(product.id, { name: product.name, price: product.price, active: event.target.checked })} />
+                    <input type="checkbox" checked={product.active} onChange={(event) => void onUpdateProduct(product.id, { name: product.name, price: product.price, tag: product.tag, active: event.target.checked })} />
                     Active
                   </label>
                   <button className="grid h-10 w-10 place-items-center rounded-xl bg-zinc-800 text-zinc-300 hover:text-white" onClick={() => startEdit(product)} aria-label={`Edit ${product.name}`}>
