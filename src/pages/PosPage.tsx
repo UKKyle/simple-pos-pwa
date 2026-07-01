@@ -1,4 +1,4 @@
-import { ArrowLeft, ChevronRight, Search, Tag, Truck, UserRound } from 'lucide-react'
+import { ArrowLeft, ChevronRight, Layers3, Receipt, Search } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { CartPanel } from '../components/CartPanel'
 import { ProductTile } from '../components/ProductTile'
@@ -21,12 +21,6 @@ interface PosPageProps {
   onClearCart: () => void
   onCheckout: () => void
 }
-
-const quickActions = [
-  { label: 'Custom sale', icon: Tag },
-  { label: 'Delivery fee', icon: Truck },
-  { label: 'Attribute staff', icon: UserRound },
-]
 
 export function PosPage({
   products,
@@ -101,6 +95,21 @@ export function PosPage({
 
   const visibleProducts = selectedGroup?.items ?? visibleUngroupedProducts
   const searchPlaceholder = selectedGroup ? `Search ${selectedGroup.tag.toLowerCase()}` : 'Search products or collections'
+  const collectionCount = groupedProducts.length
+  const summaryCards = [
+    {
+      label: 'Collections',
+      value: String(collectionCount),
+      detail: collectionCount === 1 ? 'Tagged group' : 'Tagged groups',
+      icon: Layers3,
+    },
+    {
+      label: 'Visible products',
+      value: String(visibleProducts.length),
+      detail: selectedGroup ? selectedGroup.tag : 'Ready to sell',
+      icon: Receipt,
+    },
+  ]
 
   return (
     <div className="grid h-full min-h-0 gap-4 lg:grid-cols-[minmax(0,1fr)_360px] lg:overflow-hidden xl:grid-cols-[minmax(0,1fr)_420px]">
@@ -206,10 +215,14 @@ export function PosPage({
               ))}
 
           {!selectedGroup &&
-            quickActions.map(({ label, icon: Icon }) => (
-              <div key={label} className="flex min-h-32 flex-col justify-between rounded-2xl border border-white/8 bg-zinc-900 p-4 lg:min-h-28">
-                <Icon className="h-6 w-6 text-blue-400" aria-hidden="true" />
-                <p className="text-base font-bold text-white lg:text-lg">{label}</p>
+            summaryCards.map(({ label, value, detail, icon: Icon }) => (
+              <div key={label} className="flex min-h-28 flex-col justify-between rounded-2xl border border-white/8 bg-zinc-900/82 p-4 shadow-sm">
+                <Icon className="h-5 w-5 text-blue-300" aria-hidden="true" />
+                <div>
+                  <p className="text-2xl font-black text-white">{value}</p>
+                  <p className="mt-1 text-sm font-semibold text-zinc-300">{label}</p>
+                  <p className="mt-1 text-xs font-medium uppercase tracking-[0.16em] text-zinc-500">{detail}</p>
+                </div>
               </div>
             ))}
 
