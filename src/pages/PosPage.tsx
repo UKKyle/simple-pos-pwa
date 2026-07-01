@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { CartPanel } from '../components/CartPanel'
 import { ProductTile } from '../components/ProductTile'
 import type { CartItem, PaymentMethod, Product } from '../types'
+import { formatCurrency } from '../utils/currency'
 
 interface PosPageProps {
   products: Product[]
@@ -127,7 +128,7 @@ export function PosPage({
           ) : null}
         </div>
 
-        <div className="mt-4 grid min-h-0 content-start gap-3 overflow-auto pr-1 sm:grid-cols-2 lg:auto-rows-fr 2xl:grid-cols-3">
+        <div className={`mt-4 min-h-0 overflow-auto pr-1 ${selectedGroup ? 'space-y-3' : 'grid content-start gap-3 sm:grid-cols-2 lg:auto-rows-fr 2xl:grid-cols-3'}`}>
           {!selectedGroup &&
             visibleGroups.map((group) => (
               <button
@@ -163,9 +164,46 @@ export function PosPage({
             </div>
           )}
 
-          {visibleProducts.map((product) => (
-            <ProductTile key={product.id} product={product} currency={currency} onAdd={onAddProduct} />
-          ))}
+          {selectedGroup
+            ? visibleProducts.map((product) => {
+                const initials = product.name
+                  .split(' ')
+                  .slice(0, 2)
+                  .map((word) => word[0])
+                  .join('')
+                  .toUpperCase()
+
+                return (
+                  <button
+                    key={product.id}
+                    className="group flex w-full items-center gap-4 rounded-2xl border border-white/8 bg-zinc-900/92 px-4 py-4 text-left shadow-sm transition hover:border-blue-400/50 hover:bg-zinc-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    onClick={() => onAddProduct(product)}
+                  >
+                    <span className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-blue-500/15 text-sm font-black text-blue-200 ring-1 ring-blue-400/20">
+                      {initials}
+                    </span>
+                    <span className="min-w-0 flex-1">
+                      <span className="block truncate text-base font-bold leading-tight text-white">
+                        {product.name}
+                      </span>
+                      <span className="mt-1 block text-sm font-medium text-zinc-400">
+                        Tap to add to basket
+                      </span>
+                    </span>
+                    <span className="shrink-0 text-right">
+                      <span className="block text-base font-black text-white">
+                        {formatCurrency(product.price, currency)}
+                      </span>
+                      <span className="mt-1 block text-xs font-bold uppercase tracking-[0.16em] text-zinc-500 transition group-hover:text-blue-200">
+                        Add
+                      </span>
+                    </span>
+                  </button>
+                )
+              })
+            : visibleProducts.map((product) => (
+                <ProductTile key={product.id} product={product} currency={currency} onAdd={onAddProduct} />
+              ))}
 
           {!selectedGroup &&
             quickActions.map(({ label, icon: Icon }) => (
@@ -176,7 +214,7 @@ export function PosPage({
             ))}
 
           {selectedGroup && visibleProducts.length === 0 && (
-            <div className="col-span-full grid min-h-40 place-items-center rounded-2xl border border-dashed border-white/10 bg-zinc-900/60 p-6 text-center">
+            <div className="grid min-h-40 place-items-center rounded-2xl border border-dashed border-white/10 bg-zinc-900/60 p-6 text-center">
               <div>
                 <p className="text-lg font-bold text-white">No matching products</p>
                 <p className="mt-1 text-sm text-zinc-500">Try a different search or go back to all collections.</p>
