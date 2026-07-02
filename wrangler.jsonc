@@ -11,6 +11,12 @@
   "observability": {
     "enabled": true
   },
+  "services": [
+    {
+      "binding": "CMS_WORKER",
+      "service": "bakedbymadyv2"
+    }
+  ],
   "vars": {
     "CMS_POS_INGEST_URL": "https://bakedbymadyv2.mrkyleoreilly.workers.dev/api/pos/orders"
   }

@@ -2,6 +2,9 @@ export interface Env {
   ASSETS: {
     fetch(request: Request): Promise<Response>
   }
+  CMS_WORKER?: {
+    fetch(request: Request): Promise<Response>
+  }
   CMS_POS_INGEST_URL?: string
   POS_INGEST_SECRET?: string
 }
@@ -40,7 +43,7 @@ async function proxyCmsOrder(request: Request, env: Env) {
   }
 
   const body = await request.text()
-  const response = await fetch(ingestUrl, {
+  const cmsRequest = new Request(ingestUrl, {
     method: 'POST',
     headers: {
       'Authorization': `Bearer ${secret}`,
@@ -49,6 +52,9 @@ async function proxyCmsOrder(request: Request, env: Env) {
     },
     body,
   })
+  const response = env.CMS_WORKER
+    ? await env.CMS_WORKER.fetch(cmsRequest)
+    : await fetch(cmsRequest)
 
   return new Response(response.body, {
     status: response.status,
