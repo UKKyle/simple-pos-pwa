@@ -4,7 +4,7 @@ import tailwindcss from '@tailwindcss/vite'
 import { VitePWA } from 'vite-plugin-pwa'
 
 export default defineConfig({
-  base: '/simple-pos-pwa/',
+  base: '/',
   plugins: [
     react(),
     tailwindcss(),
@@ -18,8 +18,8 @@ export default defineConfig({
         theme_color: '#050505',
         background_color: '#050505',
         display: 'standalone',
-        start_url: '/simple-pos-pwa/',
-        scope: '/simple-pos-pwa/',
+        start_url: '/',
+        scope: '/',
         icons: [
           {
             src: 'icons.svg',

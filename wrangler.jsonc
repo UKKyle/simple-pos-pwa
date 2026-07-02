@@ -1,0 +1,17 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "baked-by-mady-pos",
+  "main": "src/worker.ts",
+  "compatibility_date": "2026-04-15",
+  "assets": {
+    "binding": "ASSETS",
+    "directory": "./dist",
+    "not_found_handling": "single-page-application"
+  },
+  "observability": {
+    "enabled": true
+  },
+  "vars": {
+    "CMS_POS_INGEST_URL": "https://bakedbymadyv2.mrkyleoreilly.workers.dev/api/pos/orders"
+  }
+}

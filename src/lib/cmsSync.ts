@@ -92,18 +92,10 @@ export function buildCmsOrderPayload(order: Order, context: CmsSyncContext): Cms
 }
 
 export async function syncOrderToCms(order: Order, context: CmsSyncContext): Promise<CmsSyncResult> {
-  const url = import.meta.env.VITE_BBM_POS_INGEST_URL?.trim()
-  const secret = import.meta.env.VITE_BBM_POS_INGEST_SECRET?.trim()
-
-  if (!url || !secret) {
-    throw new Error('CMS sync is not configured. Add VITE_BBM_POS_INGEST_URL and VITE_BBM_POS_INGEST_SECRET.')
-  }
-
-  const response = await fetch(url, {
+  const response = await fetch('/api/cms-orders', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      Authorization: `Bearer ${secret}`,
     },
     body: JSON.stringify(buildCmsOrderPayload(order, context)),
   })

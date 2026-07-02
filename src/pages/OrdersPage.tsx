@@ -55,7 +55,7 @@ export function OrdersPage({ orders, currency, syncing, onDeleteOrder, onSyncPen
             disabled={pendingCount === 0 || syncing}
           >
             <CloudUpload className="h-4 w-4" aria-hidden="true" />
-            {syncing ? 'Syncing…' : `Sync pending orders${pendingCount ? ` (${pendingCount})` : ''}`}
+            {syncing ? 'Syncing...' : `Sync pending orders${pendingCount ? ` (${pendingCount})` : ''}`}
           </button>
           <button className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-zinc-900 px-4 text-sm font-bold text-white hover:bg-zinc-800 disabled:opacity-40" onClick={() => downloadOrdersCsv(filtered)} disabled={filtered.length === 0}>
             <Download className="h-4 w-4" aria-hidden="true" />
@@ -105,7 +105,7 @@ export function OrdersPage({ orders, currency, syncing, onDeleteOrder, onSyncPen
               <div className="text-left md:text-right">
                 <p className="text-xl font-black text-white">{formatCurrency(order.total, currency)}</p>
                 <p className="mt-1 text-sm font-semibold capitalize text-zinc-400">
-                  {order.paymentMethod} · {order.items.reduce((sum, item) => sum + item.quantity, 0)} items
+                  {order.paymentMethod} - {order.items.reduce((sum, item) => sum + item.quantity, 0)} items
                 </p>
               </div>
             </button>
