@@ -8,16 +8,16 @@ interface TopBarProps {
 
 export function TopBar({ businessName, pendingSyncCount, online }: TopBarProps) {
   return (
-    <header className="flex h-14 shrink-0 items-center justify-between border-b border-white/8 bg-black/70 px-4 backdrop-blur md:h-16 md:px-6">
+    <header className="flex h-16 shrink-0 items-center justify-between border-b border-black/8 bg-white px-4 md:h-[72px] md:px-6">
       <div>
-        <p className="text-xs font-bold uppercase tracking-[0.18em] text-blue-300">Simple POS</p>
-        <h1 className="text-lg font-black text-white md:text-2xl">{businessName}</h1>
+        <p className="text-xs font-black uppercase tracking-[0.18em] text-[#6d7175]">Point of Sale</p>
+        <h1 className="text-lg font-black text-[#202223] md:text-2xl">{businessName}</h1>
       </div>
-      <div className="flex items-center gap-2 rounded-full border border-white/8 bg-zinc-900 px-3 py-2 text-xs font-bold text-zinc-300 shadow-lg shadow-black/20">
-        <Wifi className={`h-4 w-4 ${online ? 'text-blue-400' : 'text-amber-300'}`} aria-hidden="true" />
+      <div className="flex items-center gap-2 rounded-full border border-black/8 bg-[#f8fafc] px-3 py-2 text-xs font-bold text-[#5f6368] shadow-sm">
+        <Wifi className={`h-4 w-4 ${online ? 'text-[#008060]' : 'text-[#b7791f]'}`} aria-hidden="true" />
         {online ? 'Online' : 'Offline'}
         {pendingSyncCount > 0 && (
-          <span className="rounded-full bg-blue-500/15 px-2 py-1 text-[10px] uppercase tracking-[0.14em] text-blue-200">
+          <span className="rounded-full bg-[#eef6ff] px-2 py-1 text-[10px] uppercase tracking-[0.14em] text-[#1256a1]">
             {pendingSyncCount} pending
           </span>
         )}

@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Layout } from '../components/Layout'
+import { PosUnlock } from '../components/PosUnlock'
 import { Toast } from '../components/Toast'
 import { clearAllData, ensureSeedData, resetDemoData } from '../db/seed'
 import { useCart } from '../hooks/useCart'
@@ -15,6 +16,10 @@ import { isValidEmail } from '../utils/validation'
 
 export function App() {
   const [ready, setReady] = useState(false)
+  const [accessChecked, setAccessChecked] = useState(false)
+  const [posConfigured, setPosConfigured] = useState(false)
+  const [posUnlocked, setPosUnlocked] = useState(false)
+  const [accessError, setAccessError] = useState('')
   const [activeTab, setActiveTab] = useState<Tab>('pos')
   const [customerName, setCustomerName] = useState('')
   const [customerEmail, setCustomerEmail] = useState('')
@@ -45,26 +50,61 @@ export function App() {
   }
 
   useEffect(() => {
+    void fetch('/api/pos-session')
+      .then(async (response) => {
+        const data = await response.json().catch(() => null) as { configured?: boolean; unlocked?: boolean; error?: string } | null
+        setPosConfigured(Boolean(data?.configured))
+        setPosUnlocked(Boolean(response.ok && data?.unlocked))
+        setAccessError(response.ok ? '' : data?.error || 'POS access status unavailable')
+      })
+      .catch(() => {
+        setPosConfigured(false)
+        setPosUnlocked(false)
+        setAccessError('POS access status unavailable')
+      })
+      .finally(() => setAccessChecked(true))
+  }, [])
+
+  const unlockPos = async (pin: string) => {
+    const response = await fetch('/api/pos-session', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ pin }),
+    }).catch(() => null)
+    const data = response ? await response.json().catch(() => null) as { ok?: boolean; error?: string } | null : null
+    const ok = Boolean(response?.ok && data?.ok)
+
+    setPosUnlocked(ok)
+    setAccessError(ok ? '' : data?.error || 'PIN was not accepted')
+
+    return ok
+  }
+
+  useEffect(() => {
+    if (!accessChecked || !posUnlocked) return
     if (bootstrapped.current) return
     bootstrapped.current = true
     void ensureSeedData().then(async () => {
       await Promise.all([refreshProducts(), refreshOrders(), refreshSettings()])
       setReady(true)
     })
-  }, [refreshOrders, refreshProducts, refreshSettings])
+  }, [accessChecked, posUnlocked, refreshOrders, refreshProducts, refreshSettings])
 
   useEffect(() => {
-    if (!ready) return
+    if (!ready || !posUnlocked) return
     void syncPendingOrders(syncContext).then((result) => {
       if (result.total > 0 && result.syncedCount > 0 && result.failedCount === 0) {
         notify(`Synced ${result.syncedCount} pending order${result.syncedCount === 1 ? '' : 's'} to CMS`)
       }
     })
-  }, [ready, syncContext, syncPendingOrders])
+  }, [ready, posUnlocked, syncContext, syncPendingOrders])
 
   useEffect(() => {
     const handleOnline = () => {
       setOnline(true)
+      if (!posUnlocked) return
       void syncPendingOrders(syncContext).then((result) => {
         if (result.syncedCount > 0) {
           notify(`Recovered ${result.syncedCount} order${result.syncedCount === 1 ? '' : 's'} to CMS`)
@@ -81,7 +121,7 @@ export function App() {
       window.removeEventListener('online', handleOnline)
       window.removeEventListener('offline', handleOffline)
     }
-  }, [syncContext, syncPendingOrders])
+  }, [posUnlocked, syncContext, syncPendingOrders])
 
   const checkout = async () => {
     setCheckoutError(null)
@@ -117,6 +157,14 @@ export function App() {
 
   const clearCart = () => {
     if (cart.items.length === 0 || confirm('Clear the current basket?')) cart.clearCart()
+  }
+
+  if (!accessChecked) {
+    return <div className="grid min-h-dvh place-items-center bg-black text-lg font-black text-white">Checking POS access...</div>
+  }
+
+  if (!posUnlocked) {
+    return <PosUnlock configured={posConfigured} error={accessError} onUnlock={unlockPos} />
   }
 
   if (!ready) {
