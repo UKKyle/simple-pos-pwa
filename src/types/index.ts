@@ -44,6 +44,7 @@ export interface Settings {
   id: 'settings'
   businessName: string
   currency: string
+  theme?: 'light' | 'dark'
 }
 
 export type Tab = 'pos' | 'orders' | 'settings'

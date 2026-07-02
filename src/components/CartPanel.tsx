@@ -1,4 +1,5 @@
-import { CreditCard, Receipt, Trash2, UserRound, WalletCards } from 'lucide-react'
+import { ChevronDown, CreditCard, Receipt, Trash2, UserPlus, UserRound, WalletCards } from 'lucide-react'
+import { useEffect, useState } from 'react'
 import type { CartItem, PaymentMethod } from '../types'
 import { formatCurrency } from '../utils/currency'
 import { QuantityStepper } from './QuantityStepper'
@@ -9,6 +10,7 @@ interface CartPanelProps {
   total: number
   itemCount: number
   currency: string
+  theme: 'light' | 'dark'
   customerName: string
   customerEmail: string
   customerPhone: string
@@ -30,6 +32,7 @@ export function CartPanel({
   total,
   itemCount,
   currency,
+  theme,
   customerName,
   customerEmail,
   customerPhone,
@@ -44,83 +47,111 @@ export function CartPanel({
   onClear,
   onCheckout,
 }: CartPanelProps) {
+  const dark = theme === 'dark'
+  const hasCustomerDetails = Boolean(customerName.trim() || customerEmail.trim() || customerPhone.trim())
+  const [customerOpen, setCustomerOpen] = useState(hasCustomerDetails)
+
+  useEffect(() => {
+    if (hasCustomerDetails) setCustomerOpen(true)
+  }, [hasCustomerDetails])
+
   return (
-    <aside className="flex h-full min-h-[70vh] min-w-0 flex-col overflow-hidden rounded-[26px] border border-black/8 bg-white p-4 shadow-xl shadow-black/8 lg:min-h-0 lg:max-h-full">
+    <aside className={`flex h-full min-h-[70vh] min-w-0 flex-col overflow-hidden rounded-[26px] border p-4 shadow-xl lg:min-h-0 lg:max-h-full ${dark ? 'border-white/10 bg-[#0f1113] shadow-black/35' : 'border-black/8 bg-white shadow-black/8'}`}>
       <div className="mb-4 flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-black text-[#202223]">Cart</h2>
-          <p className="text-sm font-semibold text-[#6d7175]">{itemCount} items</p>
+          <h2 className={`text-2xl font-black ${dark ? 'text-white' : 'text-[#202223]'}`}>Cart</h2>
+          <p className={`text-sm font-semibold ${dark ? 'text-white/55' : 'text-[#6d7175]'}`}>{itemCount} items</p>
         </div>
-        <button className="rounded-[14px] p-2 text-[#6d7175] hover:bg-[#f1f2f4] hover:text-[#202223] disabled:opacity-40" onClick={onClear} disabled={items.length === 0} aria-label="Clear basket">
+        <button className={`rounded-[14px] p-2 disabled:opacity-40 ${dark ? 'text-white/55 hover:bg-white/10 hover:text-white' : 'text-[#6d7175] hover:bg-[#f1f2f4] hover:text-[#202223]'}`} onClick={onClear} disabled={items.length === 0} aria-label="Clear basket">
           <Trash2 className="h-5 w-5" aria-hidden="true" />
         </button>
       </div>
 
-      <div className="mb-4 grid gap-2 rounded-[22px] bg-[#f8fafc] p-3">
-        <label className="block">
-          <span className="mb-1.5 flex items-center gap-2 text-xs font-black uppercase tracking-[0.14em] text-[#6d7175]">
-            <UserRound className="h-4 w-4 text-[#1256a1]" aria-hidden="true" />
-            Customer name
+      <div className={`mb-4 rounded-[22px] ${dark ? 'bg-white/6' : 'bg-[#f8fafc]'} ${customerOpen ? 'p-3' : 'p-2'}`}>
+        <button
+          className={`flex h-12 w-full items-center justify-between rounded-[17px] px-3 text-left transition ${dark ? 'text-white hover:bg-white/8' : 'text-[#202223] hover:bg-white'}`}
+          onClick={() => setCustomerOpen((open) => !open)}
+        >
+          <span className="flex min-w-0 items-center gap-3">
+            <span className={`grid h-9 w-9 shrink-0 place-items-center rounded-[14px] ${dark ? 'bg-[#1d3d5e] text-[#8fc2ff]' : 'bg-[#eef6ff] text-[#1256a1]'}`}>
+              <UserPlus className="h-4 w-4" aria-hidden="true" />
+            </span>
+            <span className="min-w-0">
+              <span className="block truncate text-sm font-black">{hasCustomerDetails ? customerName || customerEmail || customerPhone : 'Add Customer'}</span>
+              {hasCustomerDetails && <span className={`block truncate text-xs font-semibold ${dark ? 'text-white/50' : 'text-[#6d7175]'}`}>Customer details attached</span>}
+            </span>
           </span>
-          <input
-            className="h-11 w-full rounded-[16px] border border-black/8 bg-white px-3 text-[#202223] outline-none transition placeholder:text-[#9aa0a6] focus:border-[#008060] focus:ring-2 focus:ring-[#008060]/20"
-            value={customerName}
-            onChange={(event) => onCustomerNameChange(event.target.value)}
-            placeholder="Optional walk-in name"
-          />
-        </label>
+          <ChevronDown className={`h-4 w-4 shrink-0 transition ${customerOpen ? 'rotate-180' : ''} ${dark ? 'text-white/45' : 'text-[#6d7175]'}`} aria-hidden="true" />
+        </button>
 
-        <label className="block">
-          <span className="mb-1.5 flex items-center gap-2 text-xs font-black uppercase tracking-[0.14em] text-[#6d7175]">
-            <UserRound className="h-4 w-4 text-[#1256a1]" aria-hidden="true" />
-            Customer email
-          </span>
-          <input
-            className="h-11 w-full rounded-[16px] border border-black/8 bg-white px-3 text-[#202223] outline-none transition placeholder:text-[#9aa0a6] focus:border-[#008060] focus:ring-2 focus:ring-[#008060]/20"
-            type="email"
-            value={customerEmail}
-            onChange={(event) => onCustomerEmailChange(event.target.value)}
-            placeholder="optional@email.co.uk"
-          />
-        </label>
+        {customerOpen && (
+          <div className="mt-3 grid gap-2">
+            <label className="block">
+              <span className={`mb-1.5 flex items-center gap-2 text-xs font-black uppercase tracking-[0.14em] ${dark ? 'text-white/50' : 'text-[#6d7175]'}`}>
+                <UserRound className={`h-4 w-4 ${dark ? 'text-[#8fc2ff]' : 'text-[#1256a1]'}`} aria-hidden="true" />
+                Customer name
+              </span>
+              <input
+                className={`h-11 w-full rounded-[16px] border px-3 outline-none transition placeholder:text-[#9aa0a6] focus:border-[#008060] focus:ring-2 focus:ring-[#008060]/20 ${dark ? 'border-white/10 bg-[#0f1113] text-white' : 'border-black/8 bg-white text-[#202223]'}`}
+                value={customerName}
+                onChange={(event) => onCustomerNameChange(event.target.value)}
+                placeholder="Optional walk-in name"
+              />
+            </label>
 
-        <label className="block">
-          <span className="mb-1.5 flex items-center gap-2 text-xs font-black uppercase tracking-[0.14em] text-[#6d7175]">
-            <UserRound className="h-4 w-4 text-[#1256a1]" aria-hidden="true" />
-            Customer phone
-          </span>
-          <input
-            className="h-11 w-full rounded-[16px] border border-black/8 bg-white px-3 text-[#202223] outline-none transition placeholder:text-[#9aa0a6] focus:border-[#008060] focus:ring-2 focus:ring-[#008060]/20"
-            type="tel"
-            value={customerPhone}
-            onChange={(event) => onCustomerPhoneChange(event.target.value)}
-            placeholder="Optional contact number"
-          />
-        </label>
+            <label className="block">
+              <span className={`mb-1.5 flex items-center gap-2 text-xs font-black uppercase tracking-[0.14em] ${dark ? 'text-white/50' : 'text-[#6d7175]'}`}>
+                <UserRound className={`h-4 w-4 ${dark ? 'text-[#8fc2ff]' : 'text-[#1256a1]'}`} aria-hidden="true" />
+                Customer email
+              </span>
+              <input
+                className={`h-11 w-full rounded-[16px] border px-3 outline-none transition placeholder:text-[#9aa0a6] focus:border-[#008060] focus:ring-2 focus:ring-[#008060]/20 ${dark ? 'border-white/10 bg-[#0f1113] text-white' : 'border-black/8 bg-white text-[#202223]'}`}
+                type="email"
+                value={customerEmail}
+                onChange={(event) => onCustomerEmailChange(event.target.value)}
+                placeholder="optional@email.co.uk"
+              />
+            </label>
+
+            <label className="block">
+              <span className={`mb-1.5 flex items-center gap-2 text-xs font-black uppercase tracking-[0.14em] ${dark ? 'text-white/50' : 'text-[#6d7175]'}`}>
+                <UserRound className={`h-4 w-4 ${dark ? 'text-[#8fc2ff]' : 'text-[#1256a1]'}`} aria-hidden="true" />
+                Customer phone
+              </span>
+              <input
+                className={`h-11 w-full rounded-[16px] border px-3 outline-none transition placeholder:text-[#9aa0a6] focus:border-[#008060] focus:ring-2 focus:ring-[#008060]/20 ${dark ? 'border-white/10 bg-[#0f1113] text-white' : 'border-black/8 bg-white text-[#202223]'}`}
+                type="tel"
+                value={customerPhone}
+                onChange={(event) => onCustomerPhoneChange(event.target.value)}
+                placeholder="Optional contact number"
+              />
+            </label>
+          </div>
+        )}
       </div>
 
       <div className="min-h-0 flex-1 space-y-3 overflow-auto pr-1">
         {items.length === 0 ? (
-          <div className="grid h-56 place-items-center rounded-[22px] border border-dashed border-black/12 bg-[#f8fafc] text-center">
+          <div className={`grid h-56 place-items-center rounded-[22px] border border-dashed text-center ${dark ? 'border-white/15 bg-white/6' : 'border-black/12 bg-[#f8fafc]'}`}>
             <div>
-              <Receipt className="mx-auto mb-3 h-8 w-8 text-[#9aa0a6]" aria-hidden="true" />
-              <p className="font-bold text-[#202223]">Cart is empty</p>
-              <p className="mt-1 text-sm text-[#6d7175]">Tap a product tile to start an order.</p>
+              <Receipt className={`mx-auto mb-3 h-8 w-8 ${dark ? 'text-white/35' : 'text-[#9aa0a6]'}`} aria-hidden="true" />
+              <p className={`font-bold ${dark ? 'text-white' : 'text-[#202223]'}`}>Cart is empty</p>
+              <p className={`mt-1 text-sm ${dark ? 'text-white/55' : 'text-[#6d7175]'}`}>Tap a product tile to start an order.</p>
             </div>
           </div>
         ) : (
           items.map((item) => (
-            <div key={item.productId} className="rounded-[20px] border border-black/8 bg-[#fbfbfc] p-3">
+            <div key={item.productId} className={`rounded-[20px] border p-3 ${dark ? 'border-white/10 bg-[#171a1d]' : 'border-black/8 bg-[#fbfbfc]'}`}>
               <div className="flex items-start justify-between gap-3">
                 <div>
-                  <p className="font-bold text-[#202223]">{item.name}</p>
-                  <p className="mt-1 text-sm text-[#6d7175]">{formatCurrency(item.price, currency)} each</p>
+                  <p className={`font-bold ${dark ? 'text-white' : 'text-[#202223]'}`}>{item.name}</p>
+                  <p className={`mt-1 text-sm ${dark ? 'text-white/55' : 'text-[#6d7175]'}`}>{formatCurrency(item.price, currency)} each</p>
                 </div>
-                <p className="shrink-0 font-bold text-[#202223]">{formatCurrency(item.price * item.quantity, currency)}</p>
+                <p className={`shrink-0 font-bold ${dark ? 'text-white' : 'text-[#202223]'}`}>{formatCurrency(item.price * item.quantity, currency)}</p>
               </div>
               <div className="mt-3 grid grid-cols-[1fr_auto] gap-3">
-                <QuantityStepper value={item.quantity} onChange={(value) => onQuantityChange(item.productId, value)} />
-                <button className="grid h-11 w-11 place-items-center rounded-[14px] bg-white text-[#6d7175] ring-1 ring-black/8 hover:bg-[#fff0f0] hover:text-[#a12018]" onClick={() => onRemove(item.productId)} aria-label={`Remove ${item.name}`}>
+                <QuantityStepper value={item.quantity} theme={theme} onChange={(value) => onQuantityChange(item.productId, value)} />
+                <button className={`grid h-11 w-11 place-items-center rounded-[14px] ring-1 hover:bg-[#fff0f0] hover:text-[#a12018] ${dark ? 'bg-white/6 text-white/55 ring-white/10' : 'bg-white text-[#6d7175] ring-black/8'}`} onClick={() => onRemove(item.productId)} aria-label={`Remove ${item.name}`}>
                   <Trash2 className="h-4 w-4" aria-hidden="true" />
                 </button>
               </div>
@@ -129,13 +160,13 @@ export function CartPanel({
         )}
       </div>
 
-      <div className="mt-4 space-y-4 border-t border-black/8 pt-4">
+      <div className={`mt-4 space-y-4 border-t pt-4 ${dark ? 'border-white/10' : 'border-black/8'}`}>
         <div className="grid grid-cols-2 gap-2">
           {(['card', 'cash'] as const).map((method) => (
             <button
               key={method}
               className={`flex h-12 items-center justify-center gap-2 rounded-[16px] border text-sm font-bold capitalize transition ${
-                paymentMethod === method ? 'border-[#008060] bg-[#008060] text-white' : 'border-black/8 bg-[#f8fafc] text-[#5f6368] hover:bg-[#eef6ff]'
+                paymentMethod === method ? 'border-[#008060] bg-[#008060] text-white' : dark ? 'border-white/10 bg-white/6 text-white/65 hover:bg-white/10' : 'border-black/8 bg-[#f8fafc] text-[#5f6368] hover:bg-[#eef6ff]'
               }`}
               onClick={() => onPaymentMethodChange(method)}
             >
@@ -144,12 +175,12 @@ export function CartPanel({
             </button>
           ))}
         </div>
-        <dl className="space-y-2 rounded-[20px] bg-[#f8fafc] p-4 text-sm">
-          <div className="flex justify-between text-[#6d7175]">
+        <dl className={`space-y-2 rounded-[20px] p-4 text-sm ${dark ? 'bg-white/6' : 'bg-[#f8fafc]'}`}>
+          <div className={`flex justify-between ${dark ? 'text-white/55' : 'text-[#6d7175]'}`}>
             <dt>Subtotal</dt>
             <dd>{formatCurrency(subtotal, currency)}</dd>
           </div>
-          <div className="flex justify-between text-xl font-black text-[#202223]">
+          <div className={`flex justify-between text-xl font-black ${dark ? 'text-white' : 'text-[#202223]'}`}>
             <dt>Total</dt>
             <dd>{formatCurrency(total, currency)}</dd>
           </div>

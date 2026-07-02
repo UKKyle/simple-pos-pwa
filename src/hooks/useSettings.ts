@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { db } from '../db/db'
 import type { Settings } from '../types'
 
-const fallback: Settings = { id: 'settings', businessName: 'Simple POS', currency: 'GBP' }
+const fallback: Settings = { id: 'settings', businessName: 'Simple POS', currency: 'GBP', theme: 'light' }
 
 export function useSettings() {
   const [settings, setSettings] = useState<Settings>(fallback)
@@ -16,7 +16,7 @@ export function useSettings() {
   }, [refresh])
 
   const saveSettings = async (patch: Omit<Settings, 'id'>) => {
-    await db.settings.put({ id: 'settings', ...patch })
+    await db.settings.put({ ...fallback, ...settings, id: 'settings', ...patch })
     await refresh()
   }
 

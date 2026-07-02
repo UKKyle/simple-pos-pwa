@@ -33,6 +33,7 @@ export function App() {
   const orders = useOrders()
   const settings = useSettings()
   const cart = useCart()
+  const theme = settings.settings.theme ?? 'light'
   const { refresh: refreshProducts } = products
   const { refresh: refreshOrders, syncPendingOrders, createOrder, deleteOrder, pendingSyncCount, syncing } = orders
   const { refresh: refreshSettings } = settings
@@ -151,7 +152,7 @@ export function App() {
       notify(`${order.orderNumber} saved locally. CMS sync will retry automatically.`)
     }
 
-    setActiveTab('orders')
+    setActiveTab('pos')
   }
 
   const clearCart = () => {
@@ -177,6 +178,7 @@ export function App() {
         businessName={settings.settings.businessName}
         pendingSyncCount={pendingSyncCount}
         online={online}
+        theme={theme}
         onTabChange={setActiveTab}
       >
         {activeTab === 'pos' && (
@@ -186,6 +188,7 @@ export function App() {
             cartItems={cart.items}
             totals={cart.totals}
             currency={settings.settings.currency}
+            theme={theme}
             customerName={customerName}
             customerEmail={customerEmail}
             customerPhone={customerPhone}

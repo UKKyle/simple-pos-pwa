@@ -1,4 +1,4 @@
-import { ArrowLeft, ChevronRight, Layers3, Receipt, Search } from 'lucide-react'
+import { ArrowLeft, ChevronRight, Search } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { CartPanel } from '../components/CartPanel'
 import { ProductTile } from '../components/ProductTile'
@@ -11,6 +11,7 @@ interface PosPageProps {
   cartItems: CartItem[]
   totals: { subtotal: number; total: number; itemCount: number }
   currency: string
+  theme: 'light' | 'dark'
   customerName: string
   customerEmail: string
   customerPhone: string
@@ -33,6 +34,7 @@ export function PosPage({
   cartItems,
   totals,
   currency,
+  theme,
   customerName,
   customerEmail,
   customerPhone,
@@ -48,6 +50,7 @@ export function PosPage({
   onClearCart,
   onCheckout,
 }: PosPageProps) {
+  const dark = theme === 'dark'
   const [search, setSearch] = useState('')
   const [selectedTag, setSelectedTag] = useState<string | null>(null)
 
@@ -105,31 +108,16 @@ export function PosPage({
 
   const visibleProducts = selectedGroup?.items ?? visibleUngroupedProducts
   const searchPlaceholder = selectedGroup ? `Search ${selectedGroup.tag.toLowerCase()}` : 'Search products or collections'
-  const collectionCount = groupedProducts.length
-  const summaryCards = [
-    {
-      label: 'Collections',
-      value: String(collectionCount),
-      detail: collectionCount === 1 ? 'Tagged group' : 'Tagged groups',
-      icon: Layers3,
-    },
-    {
-      label: 'Visible products',
-      value: String(visibleProducts.length),
-      detail: selectedGroup ? selectedGroup.tag : 'Ready to sell',
-      icon: Receipt,
-    },
-  ]
 
   return (
     <div className="grid h-full min-h-0 gap-4 lg:grid-cols-[minmax(0,1fr)_380px] lg:overflow-hidden xl:grid-cols-[minmax(0,1fr)_430px]">
-      <section className="grid min-h-0 min-w-0 grid-rows-[auto_minmax(0,1fr)] rounded-[26px] border border-black/8 bg-white p-4 shadow-xl shadow-black/8">
+      <section className={`grid min-h-0 min-w-0 grid-rows-[auto_minmax(0,1fr)] rounded-[26px] border p-4 shadow-xl ${dark ? 'border-white/10 bg-[#0f1113] shadow-black/35' : 'border-black/8 bg-white shadow-black/8'}`}>
         <div className="space-y-4">
           <label className="relative block">
             <span className="sr-only">Search products</span>
-            <Search className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-[#6d7175]" aria-hidden="true" />
+            <Search className={`pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 ${dark ? 'text-white/45' : 'text-[#6d7175]'}`} aria-hidden="true" />
             <input
-              className="h-14 w-full rounded-[20px] border border-black/8 bg-[#f8fafc] pl-12 pr-4 text-lg font-semibold text-[#202223] outline-none placeholder:text-[#9aa0a6] focus:border-[#008060] focus:bg-white focus:ring-2 focus:ring-[#008060]/20"
+              className={`h-14 w-full rounded-[20px] border pl-12 pr-4 text-lg font-semibold outline-none transition placeholder:text-[#9aa0a6] focus:border-[#008060] focus:ring-2 focus:ring-[#008060]/20 ${dark ? 'border-white/10 bg-white/6 text-white focus:bg-white/10' : 'border-black/8 bg-[#f8fafc] text-[#202223] focus:bg-white'}`}
               value={search}
               onChange={(event) => setSearch(event.target.value)}
               placeholder={searchPlaceholder}
@@ -138,7 +126,7 @@ export function PosPage({
 
           {selectedGroup ? (
             <button
-              className="inline-flex h-11 items-center gap-2 rounded-[16px] border border-black/8 bg-[#f8fafc] px-4 text-sm font-bold text-[#202223] transition hover:bg-[#eef6ff]"
+              className={`inline-flex h-11 items-center gap-2 rounded-[16px] border px-4 text-sm font-bold transition ${dark ? 'border-white/10 bg-white/6 text-white hover:bg-white/10' : 'border-black/8 bg-[#f8fafc] text-[#202223] hover:bg-[#eef6ff]'}`}
               onClick={() => setSelectedTag(null)}
             >
               <ArrowLeft className="h-4 w-4" aria-hidden="true" />
@@ -158,34 +146,34 @@ export function PosPage({
             visibleGroups.map((group) => (
               <button
                 key={group.tag}
-                className="group col-span-full flex items-center justify-between rounded-[22px] border border-black/8 bg-[#fbfbfc] px-4 py-4 text-left shadow-sm transition hover:border-[#008060]/35 hover:bg-white hover:shadow-md focus:outline-none focus:ring-2 focus:ring-[#008060]/25"
+                className={`group col-span-full flex items-center justify-between rounded-[22px] border px-4 py-4 text-left shadow-sm transition hover:border-[#008060]/45 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-[#008060]/25 ${dark ? 'border-white/10 bg-[#171a1d] hover:bg-[#1f2327]' : 'border-black/8 bg-[#fbfbfc] hover:bg-white'}`}
                 onClick={() => setSelectedTag(group.tag)}
               >
                 <div className="flex min-w-0 items-center gap-4">
-                  <span className="grid h-11 w-11 shrink-0 place-items-center rounded-[16px] bg-[#eef6ff] text-sm font-black text-[#1256a1] ring-1 ring-[#cfe0ff]">
+                  <span className={`grid h-11 w-11 shrink-0 place-items-center rounded-[16px] text-sm font-black ring-1 ${dark ? 'bg-[#1d3d5e] text-[#8fc2ff] ring-white/10' : 'bg-[#eef6ff] text-[#1256a1] ring-[#cfe0ff]'}`}>
                     {group.tag.slice(0, 2).toUpperCase()}
                   </span>
                   <span className="min-w-0">
-                    <span className="block truncate text-base font-bold leading-tight text-[#202223]">{group.tag}</span>
-                    <span className="mt-1 block text-sm font-medium text-[#6d7175]">
+                    <span className={`block truncate text-base font-bold leading-tight ${dark ? 'text-white' : 'text-[#202223]'}`}>{group.tag}</span>
+                    <span className={`mt-1 block text-sm font-medium ${dark ? 'text-white/55' : 'text-[#6d7175]'}`}>
                       {group.items.length} product{group.items.length === 1 ? '' : 's'}
                     </span>
                   </span>
                 </div>
                 <span className="flex items-center gap-3">
-                  <span className="hidden text-sm font-semibold text-[#6d7175] md:inline">
+                  <span className={`hidden text-sm font-semibold md:inline ${dark ? 'text-white/45' : 'text-[#6d7175]'}`}>
                     View
                   </span>
-                  <ChevronRight className="h-5 w-5 text-[#9aa0a6] transition group-hover:text-[#008060]" aria-hidden="true" />
+                  <ChevronRight className={`h-5 w-5 transition group-hover:text-[#008060] ${dark ? 'text-white/35' : 'text-[#9aa0a6]'}`} aria-hidden="true" />
                 </span>
               </button>
             ))}
 
           {!selectedGroup && visibleGroups.length > 0 && visibleUngroupedProducts.length > 0 && (
             <div className="col-span-full mt-1 flex items-center gap-3 px-1 pt-2">
-              <div className="h-px flex-1 bg-black/8" />
-              <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-[#6d7175]">Products</p>
-              <div className="h-px flex-1 bg-black/8" />
+              <div className={`h-px flex-1 ${dark ? 'bg-white/10' : 'bg-black/8'}`} />
+              <p className={`text-[11px] font-bold uppercase tracking-[0.2em] ${dark ? 'text-white/45' : 'text-[#6d7175]'}`}>Products</p>
+              <div className={`h-px flex-1 ${dark ? 'bg-white/10' : 'bg-black/8'}`} />
             </div>
           )}
 
@@ -201,25 +189,25 @@ export function PosPage({
                 return (
                   <button
                     key={product.id}
-                    className="group flex w-full items-center gap-4 rounded-[22px] border border-black/8 bg-[#fbfbfc] px-4 py-4 text-left shadow-sm transition hover:border-[#008060]/35 hover:bg-white hover:shadow-md focus:outline-none focus:ring-2 focus:ring-[#008060]/25"
+                    className={`group flex w-full items-center gap-4 rounded-[22px] border px-4 py-4 text-left shadow-sm transition hover:border-[#008060]/45 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-[#008060]/25 ${dark ? 'border-white/10 bg-[#171a1d] hover:bg-[#1f2327]' : 'border-black/8 bg-[#fbfbfc] hover:bg-white'}`}
                     onClick={() => onAddProduct(product)}
                   >
-                    <span className="grid h-12 w-12 shrink-0 place-items-center rounded-[16px] bg-[#eef6ff] text-sm font-black text-[#1256a1] ring-1 ring-[#cfe0ff]">
+                    <span className={`grid h-12 w-12 shrink-0 place-items-center rounded-[16px] text-sm font-black ring-1 ${dark ? 'bg-[#1d3d5e] text-[#8fc2ff] ring-white/10' : 'bg-[#eef6ff] text-[#1256a1] ring-[#cfe0ff]'}`}>
                       {initials}
                     </span>
                     <span className="min-w-0 flex-1">
-                      <span className="block truncate text-base font-bold leading-tight text-[#202223]">
+                      <span className={`block truncate text-base font-bold leading-tight ${dark ? 'text-white' : 'text-[#202223]'}`}>
                         {product.name}
                       </span>
-                      <span className="mt-1 block text-sm font-medium text-[#6d7175]">
+                      <span className={`mt-1 block text-sm font-medium ${dark ? 'text-white/55' : 'text-[#6d7175]'}`}>
                         Tap to add to basket
                       </span>
                     </span>
                     <span className="shrink-0 text-right">
-                      <span className="block text-base font-black text-[#202223]">
+                      <span className={`block text-base font-black ${dark ? 'text-white' : 'text-[#202223]'}`}>
                         {formatCurrency(product.price, currency)}
                       </span>
-                      <span className="mt-1 block text-xs font-bold uppercase tracking-[0.16em] text-[#6d7175] transition group-hover:text-[#008060]">
+                      <span className={`mt-1 block text-xs font-bold uppercase tracking-[0.16em] transition group-hover:text-[#008060] ${dark ? 'text-white/45' : 'text-[#6d7175]'}`}>
                         Add
                       </span>
                     </span>
@@ -227,35 +215,23 @@ export function PosPage({
                 )
               })
             : visibleProducts.map((product) => (
-                <ProductTile key={product.id} product={product} currency={currency} onAdd={onAddProduct} />
+                <ProductTile key={product.id} product={product} currency={currency} theme={theme} onAdd={onAddProduct} />
               ))}
 
-          {!selectedGroup &&
-            summaryCards.map(({ label, value, detail, icon: Icon }) => (
-              <div key={label} className="flex min-h-28 flex-col justify-between rounded-[22px] border border-black/8 bg-[#fbfbfc] p-4 shadow-sm">
-                <Icon className="h-5 w-5 text-[#1256a1]" aria-hidden="true" />
-                <div>
-                  <p className="text-2xl font-black text-[#202223]">{value}</p>
-                  <p className="mt-1 text-sm font-semibold text-[#5f6368]">{label}</p>
-                  <p className="mt-1 text-xs font-medium uppercase tracking-[0.16em] text-[#6d7175]">{detail}</p>
-                </div>
-              </div>
-            ))}
-
           {!productLoadError && !selectedGroup && visibleGroups.length === 0 && visibleProducts.length === 0 && (
-            <div className="col-span-full grid min-h-40 place-items-center rounded-[22px] border border-dashed border-black/12 bg-[#f8fafc] p-6 text-center">
+            <div className={`col-span-full grid min-h-40 place-items-center rounded-[22px] border border-dashed p-6 text-center ${dark ? 'border-white/15 bg-white/6' : 'border-black/12 bg-[#f8fafc]'}`}>
               <div>
-                <p className="text-lg font-bold text-[#202223]">No active POS products</p>
-                <p className="mt-1 text-sm text-[#6d7175]">Add products in the CMS Point of Sale tab.</p>
+                <p className={`text-lg font-bold ${dark ? 'text-white' : 'text-[#202223]'}`}>No active POS products</p>
+                <p className={`mt-1 text-sm ${dark ? 'text-white/55' : 'text-[#6d7175]'}`}>Add products in the CMS Point of Sale tab.</p>
               </div>
             </div>
           )}
 
           {selectedGroup && visibleProducts.length === 0 && (
-            <div className="grid min-h-40 place-items-center rounded-[22px] border border-dashed border-black/12 bg-[#f8fafc] p-6 text-center">
+            <div className={`grid min-h-40 place-items-center rounded-[22px] border border-dashed p-6 text-center ${dark ? 'border-white/15 bg-white/6' : 'border-black/12 bg-[#f8fafc]'}`}>
               <div>
-                <p className="text-lg font-bold text-[#202223]">No matching products</p>
-                <p className="mt-1 text-sm text-[#6d7175]">Try a different search or go back to all collections.</p>
+                <p className={`text-lg font-bold ${dark ? 'text-white' : 'text-[#202223]'}`}>No matching products</p>
+                <p className={`mt-1 text-sm ${dark ? 'text-white/55' : 'text-[#6d7175]'}`}>Try a different search or go back to all collections.</p>
               </div>
             </div>
           )}
@@ -268,6 +244,7 @@ export function PosPage({
         total={totals.total}
         itemCount={totals.itemCount}
         currency={currency}
+        theme={theme}
         customerName={customerName}
         customerEmail={customerEmail}
         customerPhone={customerPhone}
