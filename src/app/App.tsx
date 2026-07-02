@@ -160,15 +160,15 @@ export function App() {
   }
 
   if (!accessChecked) {
-    return <div className="grid min-h-dvh place-items-center bg-black text-lg font-black text-white">Checking POS access...</div>
+    return <div className={`grid min-h-dvh place-items-center text-lg font-black ${theme === 'dark' ? 'bg-[#060708] text-white' : 'bg-[#f3f4f6] text-[#202223]'}`}>Checking POS access...</div>
   }
 
   if (!posUnlocked) {
-    return <PosUnlock configured={posConfigured} error={accessError} onUnlock={unlockPos} />
+    return <PosUnlock configured={posConfigured} error={accessError} theme={theme} onUnlock={unlockPos} />
   }
 
   if (!ready) {
-    return <div className="grid min-h-dvh place-items-center bg-black text-lg font-black text-white">Loading POS...</div>
+    return <div className={`grid min-h-dvh place-items-center text-lg font-black ${theme === 'dark' ? 'bg-[#060708] text-white' : 'bg-[#f3f4f6] text-[#202223]'}`}>Loading POS...</div>
   }
 
   return (
@@ -212,6 +212,7 @@ export function App() {
           <OrdersPage
             orders={orders.orders}
             currency={settings.settings.currency}
+            theme={theme}
             syncing={syncing}
             onDeleteOrder={(id) => void deleteOrder(id).then(() => notify('Order deleted'))}
             onSyncPendingOrders={() => {
@@ -243,7 +244,7 @@ export function App() {
           />
         )}
       </Layout>
-      <Toast message={toast} onClose={() => setToast(null)} />
+      <Toast message={toast} theme={theme} onClose={() => setToast(null)} />
     </>
   )
 }
