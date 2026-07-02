@@ -29,7 +29,7 @@ export function SettingsPage({ settings, onSave, onResetDemo, onClearAll, onNoti
   return (
     <section className="max-w-3xl rounded-3xl border border-white/8 bg-zinc-950/70 p-4">
       <h2 className="text-2xl font-black text-white">Settings</h2>
-      <p className="mt-1 text-sm text-zinc-400">Local business preferences and demo data controls.</p>
+      <p className="mt-1 text-sm text-zinc-400">Local business preferences and device data controls.</p>
 
       <form className="mt-6 grid gap-4" onSubmit={submit}>
         <label>
@@ -50,11 +50,11 @@ export function SettingsPage({ settings, onSave, onResetDemo, onClearAll, onNoti
         <button
           className="inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-zinc-900 px-4 font-bold text-white hover:bg-zinc-800"
           onClick={() => {
-            if (confirm('Reset demo data and clear orders?')) void onResetDemo().then(() => onNotify('Demo data reset'))
+            if (confirm('Reset this device and clear local orders? POS products are managed in the CMS.')) void onResetDemo().then(() => onNotify('Device data reset'))
           }}
         >
           <RotateCcw className="h-4 w-4" aria-hidden="true" />
-          Reset demo data
+          Reset device data
         </button>
         <button
           className="inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-red-500/15 px-4 font-bold text-red-200 hover:bg-red-500/25"

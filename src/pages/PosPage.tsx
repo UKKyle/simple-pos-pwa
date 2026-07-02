@@ -7,6 +7,7 @@ import { formatCurrency } from '../utils/currency'
 
 interface PosPageProps {
   products: Product[]
+  productLoadError: string
   cartItems: CartItem[]
   totals: { subtotal: number; total: number; itemCount: number }
   currency: string
@@ -28,6 +29,7 @@ interface PosPageProps {
 
 export function PosPage({
   products,
+  productLoadError,
   cartItems,
   totals,
   currency,
@@ -66,7 +68,7 @@ export function PosPage({
     return [...groups.entries()]
       .map(([tag, items]) => ({
         tag,
-        items: items.sort((left, right) => left.name.localeCompare(right.name)),
+        items: items.sort((left, right) => (left.sortOrder ?? 0) - (right.sortOrder ?? 0) || left.name.localeCompare(right.name)),
       }))
       .sort((left, right) => left.tag.localeCompare(right.tag))
   }, [activeProducts])
@@ -143,6 +145,12 @@ export function PosPage({
               Back to collections
             </button>
           ) : null}
+
+          {productLoadError && (
+            <div className="rounded-[18px] border border-[#f2b8b5] bg-[#fff0f0] px-4 py-3 text-sm font-bold text-[#a12018]">
+              {productLoadError}
+            </div>
+          )}
         </div>
 
         <div className={`mt-4 min-h-0 overflow-auto pr-1 ${selectedGroup ? 'space-y-3' : 'grid content-start gap-3 sm:grid-cols-2 lg:auto-rows-fr 2xl:grid-cols-3'}`}>
@@ -233,6 +241,15 @@ export function PosPage({
                 </div>
               </div>
             ))}
+
+          {!productLoadError && !selectedGroup && visibleGroups.length === 0 && visibleProducts.length === 0 && (
+            <div className="col-span-full grid min-h-40 place-items-center rounded-[22px] border border-dashed border-black/12 bg-[#f8fafc] p-6 text-center">
+              <div>
+                <p className="text-lg font-bold text-[#202223]">No active POS products</p>
+                <p className="mt-1 text-sm text-[#6d7175]">Add products in the CMS Point of Sale tab.</p>
+              </div>
+            </div>
+          )}
 
           {selectedGroup && visibleProducts.length === 0 && (
             <div className="grid min-h-40 place-items-center rounded-[22px] border border-dashed border-black/12 bg-[#f8fafc] p-6 text-center">

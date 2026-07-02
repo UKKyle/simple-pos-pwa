@@ -1,54 +1,67 @@
 import { useCallback, useEffect, useState } from 'react'
-import { db } from '../db/db'
 import type { Product } from '../types'
-import { createId } from '../utils/ids'
-import { normalizeTag } from '../utils/validation'
+
+type CmsProductResponse = {
+  ok?: boolean
+  error?: string
+  products?: Array<{
+    id: string
+    name: string
+    price: number
+    category?: string
+    sortOrder?: number
+    updatedAt?: string
+  }>
+}
+
+function mapCmsProduct(product: NonNullable<CmsProductResponse['products']>[number]): Product {
+  const now = product.updatedAt || new Date().toISOString()
+
+  return {
+    id: product.id,
+    name: product.name,
+    price: product.price,
+    tag: product.category || undefined,
+    active: true,
+    sortOrder: Number.isFinite(product.sortOrder) ? Number(product.sortOrder) : 0,
+    createdAt: now,
+    updatedAt: now,
+  }
+}
 
 export function useProducts() {
   const [products, setProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
 
   const refresh = useCallback(async () => {
-    setProducts(await db.products.orderBy('name').toArray())
-    setLoading(false)
+    setLoading(true)
+    setError('')
+
+    try {
+      const response = await fetch('/api/pos-products', {
+        headers: {
+          Accept: 'application/json',
+        },
+      })
+      const data = await response.json().catch(() => null) as CmsProductResponse | null
+
+      if (!response.ok || !data?.ok || !Array.isArray(data.products)) {
+        throw new Error(data?.error || 'POS products could not be loaded.')
+      }
+
+      setProducts(data.products.map(mapCmsProduct))
+    } catch (loadError) {
+      setProducts([])
+      setError(loadError instanceof Error ? loadError.message : 'POS products could not be loaded.')
+    } finally {
+      setLoading(false)
+    }
   }, [])
 
   useEffect(() => {
     void refresh()
   }, [refresh])
 
-  const addProduct = async (name: string, price: number, tag: string) => {
-    const existing = await db.products.where('name').equalsIgnoreCase(name.trim()).first()
-    if (existing) throw new Error('A product with this name already exists.')
-    const now = new Date().toISOString()
-    await db.products.add({
-      id: createId('product'),
-      name: name.trim(),
-      price,
-      tag: normalizeTag(tag),
-      active: true,
-      createdAt: now,
-      updatedAt: now,
-    })
-    await refresh()
-  }
-
-  const updateProduct = async (id: string, patch: Pick<Product, 'name' | 'price' | 'active' | 'tag'>) => {
-    const duplicate = await db.products.where('name').equalsIgnoreCase(patch.name.trim()).first()
-    if (duplicate && duplicate.id !== id) throw new Error('A product with this name already exists.')
-    await db.products.update(id, {
-      ...patch,
-      name: patch.name.trim(),
-      tag: normalizeTag(patch.tag ?? ''),
-      updatedAt: new Date().toISOString(),
-    })
-    await refresh()
-  }
-
-  const deleteProduct = async (id: string) => {
-    await db.products.delete(id)
-    await refresh()
-  }
-
-  return { products, loading, refresh, addProduct, updateProduct, deleteProduct }
+  return { products, loading, error, refresh }
 }

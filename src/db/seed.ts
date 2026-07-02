@@ -1,34 +1,8 @@
 import { db } from './db'
-import type { Product, Settings } from '../types'
-import { createId } from '../utils/ids'
-
-const demoProducts = [
-  ['Chocolate Brownie Box', 12, 'Brownies'],
-  ['Vanilla Cupcake Box', 15, 'Cupcakes'],
-  ['Custom Cake Deposit', 20, undefined],
-  ['Delivery Fee', 5, undefined],
-] as const
-
-async function seedDemoProducts() {
-  const now = new Date().toISOString()
-  const products: Product[] = demoProducts.map(([name, price, tag]) => ({
-    id: createId('product'),
-    name,
-    price,
-    tag,
-    active: true,
-    createdAt: now,
-    updatedAt: now,
-  }))
-
-  await db.products.bulkAdd(products)
-  await db.meta.put({ key: 'catalogState', value: 'seeded-demo' })
-}
+import type { Settings } from '../types'
 
 export async function ensureSeedData() {
-  const [productCount, orderCount, settings, catalogState] = await Promise.all([
-    db.products.count(),
-    db.orders.count(),
+  const [settings, catalogState] = await Promise.all([
     db.settings.get('settings'),
     db.meta.get('catalogState'),
   ])
@@ -42,15 +16,8 @@ export async function ensureSeedData() {
     await db.settings.put(defaultSettings)
   }
 
-  const isBrandNewInstall = !catalogState && productCount === 0 && orderCount === 0 && !settings
-
-  if (isBrandNewInstall) {
-    await seedDemoProducts()
-    return
-  }
-
   if (!catalogState) {
-    await db.meta.put({ key: 'catalogState', value: 'initialized' })
+    await db.meta.put({ key: 'catalogState', value: 'cms-managed' })
   }
 }
 
@@ -59,7 +26,7 @@ export async function resetDemoData() {
     await Promise.all([db.products.clear(), db.orders.clear(), db.meta.clear()])
     await db.settings.put({ id: 'settings', businessName: 'Simple POS', currency: 'GBP' })
   })
-  await seedDemoProducts()
+  await db.meta.put({ key: 'catalogState', value: 'cms-managed' })
 }
 
 export async function clearAllData() {

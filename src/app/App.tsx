@@ -9,7 +9,6 @@ import { useProducts } from '../hooks/useProducts'
 import { useSettings } from '../hooks/useSettings'
 import { OrdersPage } from '../pages/OrdersPage'
 import { PosPage } from '../pages/PosPage'
-import { ProductsPage } from '../pages/ProductsPage'
 import { SettingsPage } from '../pages/SettingsPage'
 import type { PaymentMethod, Tab } from '../types'
 import { isValidEmail } from '../utils/validation'
@@ -183,6 +182,7 @@ export function App() {
         {activeTab === 'pos' && (
           <PosPage
             products={products.products}
+            productLoadError={products.error}
             cartItems={cart.items}
             totals={cart.totals}
             currency={settings.settings.currency}
@@ -222,16 +222,6 @@ export function App() {
                 }
               })
             }}
-          />
-        )}
-        {activeTab === 'products' && (
-          <ProductsPage
-            products={products.products}
-            currency={settings.settings.currency}
-            onAddProduct={products.addProduct}
-            onUpdateProduct={products.updateProduct}
-            onDeleteProduct={products.deleteProduct}
-            onNotify={notify}
           />
         )}
         {activeTab === 'settings' && (

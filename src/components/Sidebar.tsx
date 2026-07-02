@@ -1,10 +1,9 @@
-import { Home, Package, ReceiptText, Settings } from 'lucide-react'
+import { Home, ReceiptText, Settings } from 'lucide-react'
 import type { Tab } from '../types'
 
 const tabs = [
   { id: 'pos', label: 'POS', icon: Home },
   { id: 'orders', label: 'Orders', icon: ReceiptText },
-  { id: 'products', label: 'Products', icon: Package },
   { id: 'settings', label: 'Settings', icon: Settings },
 ] as const
 
@@ -29,7 +28,7 @@ export function Sidebar({ activeTab, onChange }: SidebarProps) {
           </button>
         ))}
       </nav>
-      <nav className="fixed inset-x-3 bottom-3 z-30 grid grid-cols-4 rounded-[22px] border border-black/8 bg-white/95 p-2 shadow-2xl shadow-black/15 backdrop-blur md:hidden" aria-label="Main navigation">
+      <nav className="fixed inset-x-3 bottom-3 z-30 grid grid-cols-3 rounded-[22px] border border-black/8 bg-white/95 p-2 shadow-2xl shadow-black/15 backdrop-blur md:hidden" aria-label="Main navigation">
         {tabs.map(({ id, label, icon: Icon }) => (
           <button
             key={id}

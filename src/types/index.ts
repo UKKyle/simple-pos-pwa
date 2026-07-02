@@ -8,6 +8,7 @@ export interface Product {
   price: number
   tag?: string
   active: boolean
+  sortOrder?: number
   createdAt: string
   updatedAt: string
 }
@@ -45,4 +46,4 @@ export interface Settings {
   currency: string
 }
 
-export type Tab = 'pos' | 'orders' | 'products' | 'settings'
+export type Tab = 'pos' | 'orders' | 'settings'
