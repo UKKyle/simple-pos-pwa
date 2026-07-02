@@ -43,7 +43,8 @@ async function proxyCmsOrder(request: Request, env: Env) {
   }
 
   const body = await request.text()
-  const cmsRequest = new Request(ingestUrl, {
+  const cmsRequestUrl = env.CMS_WORKER ? 'https://cms.internal/api/pos/orders' : ingestUrl
+  const cmsRequest = new Request(cmsRequestUrl, {
     method: 'POST',
     headers: {
       'Authorization': `Bearer ${secret}`,
